@@ -1,8 +1,10 @@
-package org.icbt.onlinebillingsystempahanaedu.entity;
+package org.icbt.onlinebillingsystempahanaedu.customer.entity;
+
+import org.icbt.onlinebillingsystempahanaedu.entity.SuperEntity;
 
 import java.sql.Timestamp;
 
-public class CustomerEntity implements SuperEntity{
+public class CustomerEntity implements SuperEntity {
     private String cus_Id;
     private String cus_Name;
     private String cus_Address;

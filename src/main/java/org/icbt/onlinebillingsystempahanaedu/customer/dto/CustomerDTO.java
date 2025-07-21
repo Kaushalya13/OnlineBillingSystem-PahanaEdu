@@ -1,16 +1,19 @@
-package org.icbt.onlinebillingsystempahanaedu.dto;
+package org.icbt.onlinebillingsystempahanaedu.customer.dto;
+
+import org.icbt.onlinebillingsystempahanaedu.dto.SuperDTO;
 
 import java.sql.Timestamp;
 
-public class CustomerDTO implements SuperDTO{
+public class CustomerDTO implements SuperDTO {
     private String cus_Id;
     private String cus_Name;
     private String cus_Address;
     private String cus_Mobile;
     private String cus_Email;
     private String cus_AccountNumber;
+    private int units_consumed;
     private Timestamp createdAt;
-    private  Timestamp updatedAt;
+    private Timestamp updatedAt;
     private Timestamp deletedAt;
 
     public String getCus_Id() {
@@ -83,5 +86,13 @@ public class CustomerDTO implements SuperDTO{
 
     public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public int getUnits_consumed() {
+        return units_consumed;
+    }
+
+    public void setUnits_consumed(int units_consumed) {
+        this.units_consumed = units_consumed;
     }
 }
