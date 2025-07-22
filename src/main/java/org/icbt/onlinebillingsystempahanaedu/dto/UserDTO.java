@@ -1,6 +1,6 @@
 package org.icbt.onlinebillingsystempahanaedu.dto;
 
-import org.icbt.onlinebillingsystempahanaedu.constant.Role;
+import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
 
 import java.sql.Timestamp;
 
