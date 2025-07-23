@@ -1,16 +1,23 @@
-package org.icbt.onlinebillingsystempahanaedu.entity;
+package org.icbt.onlinebillingsystempahanaedu.user.dto;
+
 
 import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
+import org.icbt.onlinebillingsystempahanaedu.core.repo.SuperDTO;
 
 import java.sql.Timestamp;
 
-public class UserEntity implements SuperEntity{
-    private  int id;
-    private  String username;
-    private  String password;
+/**
+ * author : Niwanthi
+ * date : 7/22/2025
+ * time : 5:04 PM
+ */
+public class UserDTO implements SuperDTO {
+    private int id;
+    private String username;
+    private String password;
     private Role role;
     private Timestamp createdAt;
-    private  Timestamp updatedAt;
+    private Timestamp updatedAt;
     private Timestamp deletedAt;
 
     public int getId() {
