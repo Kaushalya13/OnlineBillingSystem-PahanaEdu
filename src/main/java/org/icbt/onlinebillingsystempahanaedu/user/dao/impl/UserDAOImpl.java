@@ -94,4 +94,24 @@ public class UserDAOImpl implements UserDAO {
                 args[0]
         );
     }
+
+    @Override
+    public boolean existsById(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
+        ResultSet resultSet = DAOUtil.executeQueryOrUpdate(
+                connection,
+                "SELECT 1 FROM users WHERE id = ? AND deleted_at IS NULL",
+                args[0]
+        );
+        return resultSet.next();
+    }
+
+    @Override
+    public boolean existsByUsername(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
+        ResultSet resultSet = DAOUtil.executeQueryOrUpdate(
+                connection,
+                "SELECT 1 FROM users WHERE username = ? AND deleted_at IS NULL",
+                args[0]
+        );
+        return resultSet.next();
+    }
 }
