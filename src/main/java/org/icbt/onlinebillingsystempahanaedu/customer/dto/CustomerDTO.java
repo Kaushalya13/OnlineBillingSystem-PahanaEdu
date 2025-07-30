@@ -1,6 +1,7 @@
 package org.icbt.onlinebillingsystempahanaedu.customer.dto;
 
-import org.icbt.onlinebillingsystempahanaedu.dto.SuperDTO;
+
+import org.icbt.onlinebillingsystempahanaedu.core.repo.SuperDTO;
 
 import java.sql.Timestamp;
 

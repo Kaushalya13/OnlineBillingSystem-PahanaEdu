@@ -1,6 +1,6 @@
 package org.icbt.onlinebillingsystempahanaedu.customer.entity;
 
-import org.icbt.onlinebillingsystempahanaedu.entity.SuperEntity;
+import org.icbt.onlinebillingsystempahanaedu.core.repo.SuperEntity;
 
 import java.sql.Timestamp;
 
