@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pahana Edu - Secure Login</title>
+  <title>Secure Login</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -50,7 +50,7 @@
     <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">Account Login</h2>
     <p class="text-gray-600 text-center mb-8 text-sm">Please enter your credentials to access the system.</p>
 
-    <form action="LoginServlet" method="post" class="space-y-6">
+    <form action="${pageContext.request.contextPath}/users" method="post" class="space-y-6">
       <div>
         <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
         <div class="relative">
