@@ -1,9 +1,7 @@
 package org.icbt.onlinebillingsystempahanaedu.core.db;
 
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,6 +61,45 @@ public class DBConnection {
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Error while closing database connection.", e);
             }
+        }
+    }
+
+    public static void closeStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+                logger.log(Level.INFO, "Database statement closed.");
+            }catch (SQLException e) {
+                logger.log(Level.SEVERE, "Error while closing database statement.", e);
+            }
+        }
+    }
+
+    public static void closeResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+                logger.log(Level.INFO, "Database result set closed.");
+            }catch (SQLException e) {
+                logger.log(Level.SEVERE, "Error while closing result set.", e);
+            }
+        }
+    }
+
+    public static void rollback(Connection connection) {
+        if (connection != null) {
+            try {
+                if (!connection.getAutoCommit()){
+                    connection.rollback();
+                    logger.log(Level.INFO, "Database connection rolled back.");
+                }else {
+                    logger.log(Level.INFO, "Database connection rolled back.");
+                }
+            }catch (SQLException e) {
+                logger.log(Level.SEVERE, "Error while rolling back database connection.", e);
+            }
+        }else {
+            logger.log(Level.SEVERE, "Database connection rolled back.");
         }
     }
 }
