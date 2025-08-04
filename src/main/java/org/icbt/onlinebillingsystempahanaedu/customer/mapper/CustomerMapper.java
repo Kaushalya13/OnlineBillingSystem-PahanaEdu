@@ -1,4 +1,4 @@
-package org.icbt.onlinebillingsystempahanaedu.customer.converter;
+package org.icbt.onlinebillingsystempahanaedu.customer.mapper;
 
 import org.icbt.onlinebillingsystempahanaedu.customer.dto.CustomerDTO;
 import org.icbt.onlinebillingsystempahanaedu.customer.entity.CustomerEntity;
@@ -11,7 +11,7 @@ import java.util.List;
  * date : 7/20/2025
  * time : 11:32 PM
  */
-public class CustomerConverter {
+public class CustomerMapper {
     //convert DTO to Entity
     public static CustomerEntity convertCustomerToCustomerEntity(CustomerDTO customerDTO) {
         if (customerDTO == null) {

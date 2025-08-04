@@ -1,4 +1,4 @@
-package org.icbt.onlinebillingsystempahanaedu.user.converter;
+package org.icbt.onlinebillingsystempahanaedu.user.mapper;
 
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
 import org.icbt.onlinebillingsystempahanaedu.user.entity.UserEntity;
@@ -11,7 +11,7 @@ import java.util.List;
  * date : 7/22/2025
  * time : 7:09 PM
  */
-public class UserConverter {
+public class UserMapper {
     // Convert DTO to Entity
     public static UserEntity convertUserToUserEntity(UserDTO userDTO) {
         if (userDTO == null){
