@@ -6,22 +6,21 @@ import org.icbt.onlinebillingsystempahanaedu.core.repo.SuperDTO;
 import java.sql.Timestamp;
 
 public class CustomerDTO implements SuperDTO {
-    private String cus_Id;
+    private int cus_Id;
     private String cus_Name;
     private String cus_Address;
     private String cus_Mobile;
-    private String cus_Email;
     private String cus_AccountNumber;
     private int units_consumed;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
 
-    public String getCus_Id() {
+    public int getCus_Id() {
         return cus_Id;
     }
 
-    public void setCus_Id(String cus_Id) {
+    public void setCus_Id(int cus_Id) {
         this.cus_Id = cus_Id;
     }
 
@@ -47,14 +46,6 @@ public class CustomerDTO implements SuperDTO {
 
     public void setCus_Mobile(String cus_Mobile) {
         this.cus_Mobile = cus_Mobile;
-    }
-
-    public String getCus_Email() {
-        return cus_Email;
-    }
-
-    public void setCus_Email(String cus_Email) {
-        this.cus_Email = cus_Email;
     }
 
     public String getCus_AccountNumber() {
