@@ -12,8 +12,11 @@ import java.sql.SQLException;
  * time : 7:10 PM
  */
 public interface UserDAO extends CrudDAO<UserEntity> {
-    boolean existsById(Connection connection, Object... args) throws SQLException, ClassNotFoundException;
+    UserEntity findByUsername(Connection connection, String username) throws SQLException, ClassNotFoundException;
 
-    boolean existsByUsername(Connection connection, Object... args) throws SQLException, ClassNotFoundException;
+    UserEntity validateUserCredentials(Connection connection, String username, String hashedPassword, String salt) throws SQLException, ClassNotFoundException;
+
+    int countActiveUsers(Connection connection) throws SQLException, ClassNotFoundException;
+
 
 }
