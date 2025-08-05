@@ -22,7 +22,6 @@ public class CustomerMapper {
         customerEntity.setCus_Name(customerDTO.getCus_Name());
         customerEntity.setCus_Address(customerDTO.getCus_Address());
         customerEntity.setCus_Mobile(customerDTO.getCus_Mobile());
-        customerEntity.setCus_Email(customerDTO.getCus_Email());
         customerEntity.setCus_AccountNumber(customerDTO.getCus_AccountNumber());
         customerEntity.setUnits_consumed(customerDTO.getUnits_consumed());
         customerEntity.setCreatedAt(customerDTO.getCreatedAt());
@@ -42,7 +41,6 @@ public class CustomerMapper {
         customerDTO.setCus_Name(customerEntity.getCus_Name());
         customerDTO.setCus_Address(customerEntity.getCus_Address());
         customerDTO.setCus_Mobile(customerEntity.getCus_Mobile());
-        customerDTO.setCus_Email(customerEntity.getCus_Email());
         customerDTO.setCus_AccountNumber(customerEntity.getCus_AccountNumber());
         customerDTO.setUnits_consumed(customerEntity.getUnits_consumed());
         customerDTO.setCreatedAt(customerEntity.getCreatedAt());
