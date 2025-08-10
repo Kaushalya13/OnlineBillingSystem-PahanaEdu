@@ -51,8 +51,8 @@
   }
 </style>
 
-<aside class="sidebar-container w-64 text-gray-900 flex-shrink-0 min-h-screen fixed hidden md:flex flex-col z-50">
-  <div class="flex items-center justify-center p-6 sidebar-header-border">
+<aside id="sidebar" class="sidebar-container w-64 text-gray-900 flex-shrink-0 min-h-screen fixed flex-col z-40 md:flex">
+  <div class="flex items-center justify-center p-6 border-b border-gray-200">
     <i data-feather="book-open" class="w-8 h-8 text-purple-600 mr-3"></i>
     <h1 class="text-2xl font-bold text-gray-900">Pahana Edu</h1>
   </div>
@@ -70,21 +70,28 @@
         <a href="user.jsp"
            class="sidebar-link flex items-center p-3 rounded-xl font-medium transition duration-200 <%= currentPage.contains("user.jsp") ? "active" : "" %>">
           <i data-feather="user-check" class="link-icon w-5 h-5 mr-4 <%= currentPage.contains("user.jsp") ? "" : "text-gray-500" %>"></i>
-          <span class="link-text">User</span>
+          <span class="link-text">Users</span>
         </a>
       </li>
       <li>
         <a href="customer.jsp"
            class="sidebar-link flex items-center p-3 rounded-xl font-medium transition duration-200 <%= currentPage.contains("customer.jsp") ? "active" : "" %>">
           <i data-feather="users" class="link-icon w-5 h-5 mr-4 <%= currentPage.contains("customer.jsp") ? "" : "text-gray-500" %>"></i>
-          <span class="link-text">Customer</span>
+          <span class="link-text">Customers</span>
         </a>
       </li>
       <li>
-        <a href="#"
-           class="sidebar-link flex items-center p-3 rounded-xl font-medium transition duration-200">
-          <i data-feather="settings" class="link-icon w-5 h-5 mr-4 text-gray-500"></i>
-          <span class="link-text">Settings</span>
+        <a href="item.jsp"
+           class="sidebar-link flex items-center p-3 rounded-xl font-medium transition duration-200 <%= currentPage.contains("item.jsp") ? "active" : "" %>">
+          <i data-feather="box" class="link-icon w-5 h-5 mr-4 <%= currentPage.contains("item.jsp") ? "" : "text-gray-500" %>"></i>
+          <span class="link-text">Items</span>
+        </a>
+      </li>
+      <li>
+        <a href="help.jsp"
+           class="sidebar-link flex items-center p-3 rounded-xl font-medium transition duration-200 <%= currentPage.contains("help.jsp") ? "active" : "" %>">
+          <i data-feather="help-circle" class="link-icon w-5 h-5 mr-4 <%= currentPage.contains("help.jsp") ? "" : "text-gray-500" %>"></i>
+          <span class="link-text">Help</span>
         </a>
       </li>
     </ul>
