@@ -80,9 +80,6 @@
             Remember me
           </label>
         </div>
-        <a href="#" class="font-medium text-purple-600 hover:text-purple-500 hover:underline">
-          Forgot password?
-        </a>
       </div>
 
       <div class="pt-4">
