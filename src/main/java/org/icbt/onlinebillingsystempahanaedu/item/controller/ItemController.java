@@ -64,7 +64,7 @@ public class ItemController extends HttpServlet {
     }
 
     // Main method using the helper to avoid duplication
-    private Map<String, Object> itemDtoToMap(ItemDTO dto, String createdByUsername, String updatedByUsername, String deletedByUsername) {
+    private Map<String, Object> itemDtoToMap(ItemDTO dto) {
         if (dto == null) return null;
 
         Map<String, Object> map = new HashMap<>();
@@ -191,7 +191,7 @@ public class ItemController extends HttpServlet {
                 Integer itemId = Integer.parseInt(idStr);
                 ItemDTO dto = itemService.searchById(itemId);
                 if (dto != null) {
-                    SendResponse.sendJson(resp, HttpServletResponse.SC_OK, itemDtoToMap(dto, null, null, null));
+                    SendResponse.sendJson(resp, HttpServletResponse.SC_OK, itemDtoToMap(dto));
                 } else {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_NOT_FOUND, Map.of("message", "Item not found."));
                 }
@@ -282,7 +282,8 @@ public class ItemController extends HttpServlet {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Failed to restock item."));
                 }
 
-            } else if ("update".equalsIgnoreCase(action)) {
+            }
+            else if ("update".equalsIgnoreCase(action)) {
                 // Update action
                 ItemDTO dto = new ItemDTO();
                 dto.setId(itemId);
@@ -408,19 +409,4 @@ public class ItemController extends HttpServlet {
         }
     }
 
-    // Simplified itemDtoToMap without audit fields, used for list/single item responses
-    private Map<String, Object> itemDtoToMap(ItemDTO dto) {
-        if (dto == null) return null;
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", dto.getId());
-        map.put("itemName", dto.getItemName());
-        map.put("unitPrice", dto.getUnitPrice());
-        map.put("quantity", dto.getQuantity());
-        map.put("createdAt", dto.getCreatedAt());
-        map.put("updatedAt", dto.getUpdatedAt());
-        map.put("deletedAt", dto.getDeletedAt());
-
-        return map;
-    }
 }
