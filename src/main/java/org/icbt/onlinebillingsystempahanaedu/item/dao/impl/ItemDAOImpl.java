@@ -25,7 +25,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public boolean existsByName(Connection connection, String name) throws SQLException, ClassNotFoundException {
-        String sql = "select * from item where name = ? AND deleted_at IS NULL";
+        String sql = "select * from items where item_name = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
         try {
             resultSet = DAOUtil.executeQuery(connection, sql, name);
@@ -37,7 +37,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public boolean findItemById(Connection connection, Integer id) throws SQLException, ClassNotFoundException {
-        String sql = "select * from item where id = ? AND deleted_at IS NULL";
+        String sql = "select * from items where id = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
         try {
             resultSet = DAOUtil.executeQuery(connection, sql, id);
@@ -49,7 +49,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public ItemEntity findByName(Connection connection, String name) throws SQLException, ClassNotFoundException {
-        String sql = "select * from item where name = ? AND deleted_at IS NULL";
+        String sql = "select * from items where item_name = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
         try {
             resultSet = DAOUtil.executeQuery(connection, sql, name);
@@ -79,7 +79,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public boolean add(Connection connection, ItemEntity entity) throws SQLException, ClassNotFoundException {
-        String sql = "INSERT INTO items (itemName, unitPrice, quantity) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO items (item_name, unit_price, quantity) VALUES (?, ?, ?)";
         try {
             return DAOUtil.executeUpdate(connection, sql,
                     entity.getItemName(),
@@ -101,14 +101,14 @@ public class ItemDAOImpl implements ItemDAO {
 
         // Add search filters if present
         if (searchParams != null) {
-            if (searchParams.containsKey("itemName")) {
-                sqlBuilder.append(" AND itemName LIKE ?");
-                params.add("%" + searchParams.get("itemName") + "%");
+            String searchValue = searchParams.get("search");
+            if (searchValue != null && !searchValue.trim().isEmpty()) {
+                sqlBuilder.append(" AND item_name LIKE ?");
+                params.add("%" + searchValue.trim() + "%");
             }
-            // You can add more filters similarly, e.g., by price range, quantity, etc.
         }
 
-        sqlBuilder.append(" ORDER BY itemName ASC");
+        sqlBuilder.append(" ORDER BY id ASC");
 
         ResultSet resultSet = null;
         try {
@@ -138,7 +138,7 @@ public class ItemDAOImpl implements ItemDAO {
             if (resultSet.next()) {
                 return mapResultSetToItemEntity(resultSet);
             }
-            return null; // No item found with the given ID
+            return null;
         } finally {
             DBConnection.closeResultSet(resultSet);
         }
@@ -147,7 +147,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public boolean update(Connection connection, ItemEntity entity) throws SQLException, ClassNotFoundException {
-        String sql = "UPDATE items SET itemName = ?, unitPrice = ?, quantity = ? WHERE id = ? AND deleted_at IS NULL";
+        String sql = "UPDATE items SET item_name = ?, unit_price = ?, quantity = ? WHERE id = ? AND deleted_at IS NULL";
         try {
             return DAOUtil.executeUpdate(connection, sql,
                     entity.getItemName(),
@@ -189,12 +189,12 @@ public class ItemDAOImpl implements ItemDAO {
     private ItemEntity mapResultSetToItemEntity(ResultSet resultSet) throws SQLException {
         ItemEntity itemEntity = new ItemEntity();
         itemEntity.setId(resultSet.getInt("id"));
-        itemEntity.setItemName(resultSet.getString("itemName"));
-        itemEntity.setUnitPrice(resultSet.getDouble("unitPrice"));
+        itemEntity.setItemName(resultSet.getString("item_name"));
+        itemEntity.setUnitPrice(resultSet.getDouble("unit_price"));
         itemEntity.setQuantity(resultSet.getInt("quantity"));
-        itemEntity.setCreatedAt(resultSet.getTimestamp("createdAt"));
-        itemEntity.setUpdatedAt(resultSet.getTimestamp("updatedAt"));
-        itemEntity.setDeletedAt(resultSet.getTimestamp("deletedAt"));
+        itemEntity.setCreatedAt(resultSet.getTimestamp("created_at"));
+        itemEntity.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+        itemEntity.setDeletedAt(resultSet.getTimestamp("deleted_at"));
         return itemEntity;
     }
 }

@@ -11,7 +11,6 @@ import org.icbt.onlinebillingsystempahanaedu.item.service.ItemService;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -119,7 +118,7 @@ public class ItemServiceImpl implements ItemService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error while searching item by ID: " + e.getMessage(), e);
-            throw e; // rethrow so caller can handle
+            throw e;
         } finally {
             DBConnection.closeConnection(connection);
         }
@@ -129,29 +128,16 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDTO> getAll(Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
         Connection connection = null;
-        List<ItemDTO> resultList = new ArrayList<>();
-
         try {
             connection = DBConnection.getConnection();
-            logger.info("Fetching all items with search parameters: " + searchParams);
-
             List<ItemEntity> entities = itemDAO.getAll(connection, searchParams);
-
-            if (entities != null && !entities.isEmpty()) {
-                resultList = ItemMapper.convertItemEntityListToItemDTOList(entities);
-                logger.info("Retrieved " + resultList.size() + " items from database.");
-            } else {
-                logger.warning("No items found for given search parameters.");
-            }
-
+            return ItemMapper.convertItemEntityListToItemDTOList(entities);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error while retrieving all items: " + e.getMessage(), e);
-            throw e;
+            logger.log(Level.SEVERE, "Error while getting all items: " + e.getMessage(), e);
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
-
-        return resultList;
     }
 
 
@@ -218,7 +204,7 @@ public class ItemServiceImpl implements ItemService {
 
             // Check if item exists
             if (!itemDAO.findItemById(connection, itemId)) {
-                throw new CustomException(CustomException.ExceptionType.ITEM_NOT_FOUND);  // Stop if item does not exist
+                throw new CustomException(CustomException.ExceptionType.ITEM_NOT_FOUND);
             }
 
             // Perform delete (soft delete)
@@ -239,7 +225,7 @@ public class ItemServiceImpl implements ItemService {
                 connection.rollback();
             }
             logger.severe("Database error during item soft delete: " + e.getMessage());
-            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR); // propagate the exception
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
@@ -254,7 +240,7 @@ public class ItemServiceImpl implements ItemService {
             return count;
         } catch (SQLException e) {
             logger.severe("Database error during getItemsCount: " + e.getMessage());
-            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);  // Rethrow the SQLException
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }

@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @WebServlet(name = "ItemController", urlPatterns = "/items")
 public class ItemController extends HttpServlet {
+
     private ItemService itemService;
     private UserService userService;
     private static final Logger logger = Logger.getLogger(ItemController.class.getName());
@@ -68,16 +69,12 @@ public class ItemController extends HttpServlet {
 
         Map<String, Object> map = new HashMap<>();
         map.put("id", dto.getId());
-        map.put("itemName", dto.getItemName()); // Changed 'name' to 'itemName' to match the DTO
+        map.put("itemName", dto.getItemName());
         map.put("unitPrice", dto.getUnitPrice());
-        map.put("quantity", dto.getQuantity()); // Changed 'stockQuantity' to 'quantity'
+        map.put("quantity", dto.getQuantity());
         map.put("createdAt", dto.getCreatedAt());
         map.put("updatedAt", dto.getUpdatedAt());
         map.put("deletedAt", dto.getDeletedAt());
-        // Added audit fields for the view modal
-        map.put("createdBy", createdByUsername);
-        map.put("updatedBy", updatedByUsername);
-        map.put("deletedBy", deletedByUsername);
 
         return map;
     }
@@ -101,7 +98,7 @@ public class ItemController extends HttpServlet {
             if (body != null && !body.isEmpty()) {
                 Arrays.stream(body.split("&"))
                         .forEach(pair -> {
-                            String[] keyValue = pair.split("=", 2);  // limit split to 2 parts
+                            String[] keyValue = pair.split("=", 2);
                             if (keyValue.length == 2) {
                                 String key = safeDecode(keyValue[0]);
                                 String value = safeDecode(keyValue[1]);
@@ -147,7 +144,6 @@ public class ItemController extends HttpServlet {
             boolean isAdded = itemService.add(dto);
             if (isAdded) {
                 ItemDTO addedItem = itemService.findByName(dto.getItemName());
-                // Use the simplified dtoToMap for the response
                 SendResponse.sendJson(resp, HttpServletResponse.SC_CREATED, Map.of("message", "Item added successfully", "item", itemDtoToMap(addedItem)));
             } else {
                 SendResponse.sendJson(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Item addition failed unexpectedly."));
@@ -186,12 +182,12 @@ public class ItemController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         try {
             String idStr = req.getParameter("id");
             String name = req.getParameter("name");
 
             if (idStr != null && !idStr.trim().isEmpty()) {
-                // Get single item by ID
                 Integer itemId = Integer.parseInt(idStr);
                 ItemDTO dto = itemService.searchById(itemId);
                 if (dto != null) {
@@ -200,7 +196,6 @@ public class ItemController extends HttpServlet {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_NOT_FOUND, Map.of("message", "Item not found."));
                 }
             } else if (name != null && !name.trim().isEmpty()) {
-                // Get single item by name
                 ItemDTO dto = itemService.findByName(name);
                 if (dto != null) {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_OK, itemDtoToMap(dto));
@@ -208,11 +203,10 @@ public class ItemController extends HttpServlet {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_NOT_FOUND, Map.of("message", "Item not found."));
                 }
             } else {
-                // If no id or name, get list with optional search param
                 Map<String, String> searchParams = new HashMap<>();
                 String searchTerm = req.getParameter("search");
                 if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                    searchParams.put("itemName", searchTerm); // Fixed to use 'itemName' key
+                    searchParams.put("search", searchTerm);
                 }
 
                 List<ItemDTO> list = itemService.getAll(searchParams);
@@ -228,7 +222,7 @@ public class ItemController extends HttpServlet {
         } catch (CustomException e) {
             logger.log(Level.SEVERE, "Error during GET /items: " + e.getMessage(), e);
             String errorMessage;
-            int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR; // Default to 500 for DB errors
+            int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             if (e.getExceptionType() == CustomException.ExceptionType.ITEM_NOT_FOUND) {
                 errorMessage = "Item not found.";
                 statusCode = HttpServletResponse.SC_NOT_FOUND;
@@ -303,7 +297,7 @@ public class ItemController extends HttpServlet {
                     return;
                 }
 
-                dto.setUnitPrice(Double.parseDouble(unitPriceStr)); // Fixed parse type
+                dto.setUnitPrice(Double.parseDouble(unitPriceStr));
                 dto.setQuantity(Integer.parseInt(quantityStr));
 
                 boolean updated = itemService.update(dto);
