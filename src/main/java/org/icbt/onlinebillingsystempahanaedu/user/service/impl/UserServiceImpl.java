@@ -1,7 +1,9 @@
 package org.icbt.onlinebillingsystempahanaedu.user.service.impl;
 
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
-import org.icbt.onlinebillingsystempahanaedu.user.converter.UserConverter;
+import org.icbt.onlinebillingsystempahanaedu.core.util.PasswordSecurityUtil;
+import org.icbt.onlinebillingsystempahanaedu.user.entity.UserEntity;
+import org.icbt.onlinebillingsystempahanaedu.user.mapper.UserMapper;
 import org.icbt.onlinebillingsystempahanaedu.user.dao.UserDAO;
 import org.icbt.onlinebillingsystempahanaedu.user.dao.impl.UserDAOImpl;
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
@@ -11,6 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,73 +33,200 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean add(UserDTO dto) throws SQLException, ClassNotFoundException {
-        logger.info("add user (username) : " + dto.getUsername());
-        if (userDAO.existsById(connection,dto.getId())){
-            throw new SQLException("Cannot add user: ID already exists.");
-        }
-        if (userDAO.existsByUsername(connection,dto.getUsername())){
-            throw new SQLException("Cannot add user: Username already exists");
-        }
+        Connection connection = null;
 
-        boolean isSuccess = userDAO.add(connection,UserConverter.convertUserToUserEntity(dto));
-        if (!isSuccess){
-            throw new SQLException("Add user failed");
+        try {
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
+
+            if (userDAO.findByUsername(connection, dto.getUsername()) != null) {
+                throw new SQLException("Username already exists");
+            }
+
+            String hashedPassword = PasswordSecurityUtil.hashPassword(dto.getPassword());
+            dto.setPassword(hashedPassword);
+
+            UserEntity userEntity = UserMapper.convertUserToUserEntity(dto);
+            boolean isAdded = userDAO.add(connection, userEntity);
+
+            if (!isAdded) {
+                connection.rollback();
+                throw new SQLException("Add user failed");
+            }
+
+            connection.commit();
+            logger.info("User added successfully: " + dto.getUsername());
+            return true;
+
+        } catch (SQLException e) {
+            DBConnection.rollback(connection);
+            logger.log(Level.SEVERE, "Failed to add user: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
         }
-        return true;
     }
 
     @Override
     public UserDTO searchById(Object... args) throws SQLException, ClassNotFoundException {
-        logger.info("search user by id : " + args[0]);
-        UserDTO userDTO = UserConverter.convertUserEntityToUserDTO(userDAO.searchById(connection,args[0]));
-        if (userDTO == null){
-            throw new SQLException("User not found");
+        if (args.length == 0 || args[0] == null) {
+            throw new IllegalArgumentException("User ID must be provided.");
         }
-        return userDTO;
+
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+            logger.info("Searching user by ID: " + args[0]);
+
+            UserEntity userEntity = userDAO.searchById(connection, args[0]);
+            if (userEntity == null) {
+                throw new SQLException("User not found with ID: " + args[0]);
+            }
+
+            return UserMapper.convertUserEntityToUserDTO(userEntity);
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Database error during searchById: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
     }
 
     @Override
     public List<UserDTO> getAll(Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
-        logger.info("search all users  : " + searchParams.get("username"));
-        return UserConverter.convertUserEntityToUserDTOList(userDAO.getAll(connection,searchParams));
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+            logger.info("Fetching users with search params: " + searchParams);
+
+            List<UserEntity> userEntities = userDAO.getAll(connection, searchParams);
+            return UserMapper.convertUserEntityToUserDTOList(userEntities);
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Database error during getAll users: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
     }
+
 
     @Override
     public boolean update(UserDTO dto) throws SQLException, ClassNotFoundException {
-        logger.info("update user (username) : " + dto.getUsername());
-        // 1. Check if the user ID exists before updating
-        if (!userDAO.existsById(connection,dto.getId())){
-            throw new SQLException("Cannot update user: ID does not exist.");
-        }
+        Connection connection = null;
 
-        //Proceed with update
-        boolean updateSuccess = userDAO.update(connection,UserConverter.convertUserToUserEntity(dto));
-        if (!updateSuccess){
-            throw new SQLException("Update user failed");
+        try {
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
+
+            UserEntity existingUser = userDAO.searchById(connection, dto.getId());
+            if (existingUser == null) {
+                throw new SQLException("User not found for update");
+            }
+
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty() &&
+                    !PasswordSecurityUtil.verifyPassword(dto.getPassword(), existingUser.getPassword())) {
+                String hashedPassword = PasswordSecurityUtil.hashPassword(dto.getPassword());
+                dto.setPassword(hashedPassword);
+            } else {
+                dto.setPassword(existingUser.getPassword());
+            }
+
+            UserEntity userEntity = UserMapper.convertUserToUserEntity(dto);
+            boolean isUpdated = userDAO.update(connection, userEntity);
+
+            if (!isUpdated) {
+                connection.rollback();
+                throw new SQLException("Update user failed");
+            }
+
+            connection.commit();
+            logger.info("User updated successfully: " + dto.getUsername());
+            return true;
+
+        } catch (SQLException e) {
+            DBConnection.rollback(connection);
+            logger.log(Level.SEVERE, "Failed to update user: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
         }
-        return true;
     }
+
 
     @Override
     public boolean delete(Object... args) throws SQLException, ClassNotFoundException {
-        if (args.length == 0 || args[0] == null) {
-            throw new IllegalArgumentException("User ID must be provided to delete.");
+        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof Integer)) {
+            throw new IllegalArgumentException("Delete requires user ID and deletedBy user ID.");
         }
 
-        Object id = args[0];
-        logger.info("delete user (user id) : " );
+        Integer userId = (Integer) args[0];
+        Integer deletedBy = (Integer) args[1];
 
-        // Check if the user exists before deleting
-        if (!userDAO.existsById(connection, id)) {
-            throw new SQLException("Cannot delete user: ID does not exist.");
+        final int INITIAL_ADMIN_ID = 1;
+        if (userId.equals(INITIAL_ADMIN_ID)) {
+            logger.warning("Attempt to delete initial admin user (ID: " + INITIAL_ADMIN_ID + ") was blocked.");
+            throw new SQLException("Unauthorized: Cannot delete the initial admin user.");
         }
 
-        // Call delete method in DAO
-        boolean deleteSuccess = userDAO.delete(connection, id);
-        if (!deleteSuccess) {
-            throw new SQLException("Delete user failed");
-        }
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
 
-        return true;
+            UserEntity existingUser = userDAO.searchById(connection, userId);
+            if (existingUser == null) {
+                throw new SQLException("User not found for deletion.");
+            }
+
+            boolean isDeleted = userDAO.delete(connection, userId);
+            if (!isDeleted) {
+                connection.rollback();
+                throw new SQLException("User deletion failed.");
+            }
+
+            connection.commit();
+            logger.info("User deleted successfully: ID " + userId);
+            return true;
+
+        } catch (SQLException e) {
+            DBConnection.rollback(connection);
+            logger.log(Level.SEVERE, "Failed to delete user: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
     }
+
+
+    @Override
+    public UserDTO loginUser(String username, String password) throws SQLException, ClassNotFoundException {
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+
+            UserEntity userEntity = userDAO.findByUsername(connection, username);
+            if (userEntity == null) {
+                logger.warning("Login failed: Username not found -> " + username);
+                throw new SQLException("Invalid username or password");
+            }
+
+            boolean isValid = PasswordSecurityUtil.verifyPassword(password, userEntity.getPassword());
+            if (!isValid) {
+                logger.warning("Login failed: Invalid password for username -> " + username);
+                throw new SQLException("Invalid username or password");
+            }
+
+            logger.info("User logged in successfully: " + username);
+            return UserMapper.convertUserEntityToUserDTO(userEntity);
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error during user login: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
+    }
+
 }
