@@ -52,18 +52,25 @@ public class CustomerDAOImpl implements CustomerDAO {
             if (searchValue != null && !searchValue.trim().isEmpty()) {
                 sql.append(" AND (cus_Name LIKE ? OR cus_Mobile LIKE ? OR cus_AccountNumber LIKE ?)");
                 params.add("%" + searchValue.trim() + "%");
+                params.add("%" + searchValue.trim() + "%");
+                params.add("%" + searchValue.trim() + "%");
             }
         }
 
-        sql.append(" ORDER BY cus_Name ASC");
+        sql.append(" ORDER BY id ASC");
 
         ResultSet resultSet = null;
         try {
-            resultSet = DAOUtil.executeQuery(connection, sql.toString(), params);
+            if (!params.isEmpty()) {
+                resultSet = DAOUtil.executeQuery(connection, sql.toString(), params.toArray());
+            } else {
+                resultSet = DAOUtil.executeQuery(connection, sql.toString());
+            }
+
             while (resultSet.next()) {
                 customers.add(mapResultSetToCustomerEntity(resultSet));
             }
-        }finally {
+        } finally {
             DBConnection.closeResultSet(resultSet);
         }
         return customers;
@@ -71,11 +78,11 @@ public class CustomerDAOImpl implements CustomerDAO {
 
     @Override
     public CustomerEntity searchById(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
-        if (args.length == 0 || args[0] instanceof Integer) {
+        if (args.length == 0 || !(args[0] instanceof Integer)) {
             throw new IllegalArgumentException("ID parameter is required and must be an Integer.");
         }
         int id = (Integer) args[0];
-        String sql = "SELECT * FROM customers WHERE deleted_at IS NULL";
+        String sql = "SELECT * FROM customers WHERE id = ? AND deleted_at IS NULL";
 
         ResultSet resultSet = null;
 
@@ -85,14 +92,14 @@ public class CustomerDAOImpl implements CustomerDAO {
                 return mapResultSetToCustomerEntity(resultSet);
             }
             return null;
-        }finally {
+        } finally {
             DBConnection.closeResultSet(resultSet);
         }
     }
 
     @Override
     public boolean update(Connection connection, CustomerEntity entity) throws SQLException, ClassNotFoundException {
-        String sql = "UPDATE customers SET cus_Name = ?, cus_Address = ?, cus_Mobile = ?, cus_AccountNumber = ?, units_consumed =? WHERE deleted_at IS NULL";
+        String sql = "UPDATE customers SET cus_Name = ?, cus_Address = ?, cus_Mobile = ?, cus_AccountNumber = ?, units_consumed = ? WHERE id = ? AND deleted_at IS NULL";
         try {
             return DAOUtil.executeUpdate(
                     connection,sql,
@@ -175,7 +182,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 
     @Override
     public CustomerEntity findByAccountNumber(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
-        String sql = "SELECT 1 FROM customers WHERE cus_AccountNumber = ? AND deleted_at IS NULL";
+        String sql = "SELECT * FROM customers WHERE cus_AccountNumber = ? AND deleted_at IS NULL";
         String accountNumber = (String) args[0];
         ResultSet resultSet = null;
 
@@ -192,7 +199,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 
     private CustomerEntity mapResultSetToCustomerEntity(ResultSet resultSet) throws SQLException {
         CustomerEntity customerEntity = new CustomerEntity();
-        customerEntity.setCus_Id(resultSet.getInt("cus_Id"));
+        customerEntity.setCus_Id(resultSet.getInt("id"));
         customerEntity.setCus_Name(resultSet.getString("cus_Name"));
         customerEntity.setCus_Address(resultSet.getString("cus_Address"));
         customerEntity.setCus_Mobile(resultSet.getString("cus_Mobile"));

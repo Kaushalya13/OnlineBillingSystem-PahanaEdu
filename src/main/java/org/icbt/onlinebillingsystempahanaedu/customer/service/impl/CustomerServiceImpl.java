@@ -184,32 +184,32 @@ public class CustomerServiceImpl implements CustomerService {
             throw new IllegalArgumentException("Delete requires deleter ID (Integer) and item ID (Integer).");
         }
         Integer deletedByUserId = (Integer) args[0];
-        String accountNumber = (String) args[1];
+        String customerId  = (String) args[1];
         Connection connection = null;
 
         try {
             connection = DBConnection.getConnection();
             connection.setAutoCommit(false);
 
-            logger.log(Level.INFO,"Attempting to soft delete Account Number",accountNumber);
+            logger.log(Level.INFO,"Attempting to soft delete Account Number",customerId );
 
-            if (!customerDAO.existsByAccountNumber(connection, accountNumber)) {
+            if (!customerDAO.existsByAccountNumber(connection, customerId )) {
                 throw new CustomException(CustomException.ExceptionType.CUSTOMER_NOT_FOUND);
             }
 
-            boolean isDeleted = customerDAO.delete(connection, accountNumber, deletedByUserId);
+            boolean isDeleted = customerDAO.delete(connection, customerId , deletedByUserId);
             if (isDeleted) {
                 connection.commit();
-                logger.log(Level.INFO,"Customer deleted successfully",accountNumber);
+                logger.log(Level.INFO,"Customer deleted successfully",customerId );
                 return true;
             }else {
                 connection.rollback();
-                logger.log(Level.INFO,"Customer delete failed",accountNumber);
+                logger.log(Level.INFO,"Customer delete failed",customerId );
                 throw new CustomException(CustomException.ExceptionType.CUSTOMER_DELETION_FAILED);
             }
         }catch (SQLException e) {
             DBConnection.rollback(connection);
-            logger.log(Level.SEVERE, "Error during customer deleting for Id" + accountNumber);
+            logger.log(Level.SEVERE, "Error during customer deleting for Id" + customerId );
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         }finally {
             DBConnection.closeConnection(connection);

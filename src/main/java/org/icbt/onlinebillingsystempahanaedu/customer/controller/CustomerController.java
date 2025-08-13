@@ -174,9 +174,19 @@ public class CustomerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            String accountNumber = request.getParameter("cus_AccountNumber");
-            Map<String, String> searchParams = new HashMap<>();
+            String idStr = request.getParameter("id");
+            if (idStr != null && !idStr.isEmpty()) {
+                int id = Integer.parseInt(idStr);
+                CustomerDTO dto = customerService.searchById(id);
+                if (dto != null) {
+                    SendResponse.sendJson(response, HttpServletResponse.SC_OK, Map.of("message", "Customer found successfully.", "customer", customerDTOtoMap(dto)));
+                } else {
+                    SendResponse.sendJson(response, HttpServletResponse.SC_NOT_FOUND, Map.of("message", "Customer not found."));
+                }
+                return;
+            }
 
+            String accountNumber = request.getParameter("cus_AccountNumber");
             if (accountNumber != null && !accountNumber.isEmpty()) {
                 CustomerDTO dto = customerService.findByAccountNumber(accountNumber);
                 if (dto != null) {
@@ -186,6 +196,7 @@ public class CustomerController extends HttpServlet {
                 }
             } else {
                 String searchTerm = request.getParameter("search");
+                Map<String, String> searchParams = new HashMap<>();
                 if (searchTerm != null && !searchTerm.isEmpty()) {
                     searchParams.put("search", searchTerm);
                 }
@@ -197,8 +208,8 @@ public class CustomerController extends HttpServlet {
                 SendResponse.sendJson(response, HttpServletResponse.SC_OK, customerMaps);
             }
         } catch (NumberFormatException e) {
-            logger.log(Level.WARNING, "Error Invalid number format for unit consumed: " + e.getMessage());
-            SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid unit consumed. Enter valid number"));
+            logger.log(Level.WARNING, "Error Invalid number format for ID or units consumed: " + e.getMessage());
+            SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid number format in request."));
         } catch (CustomException e) {
             logger.log(Level.WARNING, "Error Custom Exception: " + e.getMessage() + " - " + e.getExceptionType().name());
             String error;
@@ -215,7 +226,6 @@ public class CustomerController extends HttpServlet {
             SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Internal server error."));
         }
     }
-
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         String currentUserRole = getUserRoleFromSession(request);
@@ -232,7 +242,7 @@ public class CustomerController extends HttpServlet {
 
         try {
             Map<String, String> params = parseUrlEncodedBody(request);
-            String idStr = params.get("id");
+            String idStr = params.get("cus_Id");
 
             CustomerDTO dto = new CustomerDTO();
 
@@ -243,11 +253,11 @@ public class CustomerController extends HttpServlet {
                 return;
             }
 
-            dto.setCus_Name(request.getParameter("cus_Name"));
-            dto.setCus_Address(request.getParameter("cus_Address"));
-            dto.setCus_Mobile(request.getParameter("cus_Mobile"));
-            dto.setCus_AccountNumber(request.getParameter("cus_AccountNumber"));
-            String unitsConsumedStr = request.getParameter("units_consumed");
+            dto.setCus_Name(params.get("cus_Name"));
+            dto.setCus_Address(params.get("cus_Address"));
+            dto.setCus_Mobile(params.get("cus_Mobile"));
+            dto.setCus_AccountNumber(params.get("cus_AccountNumber"));
+            String unitsConsumedStr = params.get("units_consumed");
             dto.setUnits_consumed(unitsConsumedStr != null && !unitsConsumedStr.isEmpty() ? Integer.parseInt(unitsConsumedStr) : 0);
 
             if (dto.getCus_AccountNumber() == null || dto.getCus_AccountNumber().trim().isEmpty() ||
