@@ -2,6 +2,7 @@ package org.icbt.onlinebillingsystempahanaedu.core.init;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener; // Import the WebListener annotation
 import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
 import org.icbt.onlinebillingsystempahanaedu.user.service.UserService;
@@ -15,6 +16,7 @@ import java.util.logging.Logger;
  * date : 8/5/2025
  * time : 12:47 PM
  */
+@WebListener
 public class SystemStartupListener implements ServletContextListener {
 
     private static final Logger LOGGER = Logger.getLogger(SystemStartupListener.class.getName());
@@ -54,4 +56,5 @@ public class SystemStartupListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.log(Level.INFO, "System shutdown initiated.");
     }
+
 }
