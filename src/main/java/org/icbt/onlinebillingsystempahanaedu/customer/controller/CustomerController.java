@@ -226,6 +226,7 @@ public class CustomerController extends HttpServlet {
             SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Internal server error."));
         }
     }
+
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         String currentUserRole = getUserRoleFromSession(request);
@@ -320,18 +321,18 @@ public class CustomerController extends HttpServlet {
 
         if (!"ADMIN".equals(currentUserRole) || (currentUserId == null || !currentUserId.equals(INITIAL_ADMIN_ID))) {
             SendResponse.sendJson(response, HttpServletResponse.SC_FORBIDDEN,
-                    Map.of("message", "Unauthorized: Only the Initial Admin can delete items."));
+                    Map.of("message", "Unauthorized: Only the Initial Admin can delete customers."));
             return;
         }
 
-        String accountNumber = request.getParameter("accountNumber");
-        if (accountNumber == null || accountNumber.trim().isEmpty()) {
-            SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid account number"));
+        String id = request.getParameter("id");
+        if (id == null || id.trim().isEmpty()) {
+            SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid id number"));
             return;
         }
 
         try {
-            boolean deleted = customerService.delete(currentUserId,accountNumber);
+            boolean deleted = customerService.delete(currentUserId,id);
             if (deleted) {
                 SendResponse.sendJson(response, HttpServletResponse.SC_OK, Map.of("message", "Customer deleted successfully."));
             }else {
