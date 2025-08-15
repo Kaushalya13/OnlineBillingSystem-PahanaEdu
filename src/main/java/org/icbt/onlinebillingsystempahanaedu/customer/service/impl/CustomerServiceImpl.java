@@ -180,38 +180,40 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean delete(Object... args) throws SQLException, ClassNotFoundException {
-        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof Integer)) {
-            throw new IllegalArgumentException("Delete requires deleter ID (Integer) and item ID (Integer).");
+        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof String)) {
+            throw new IllegalArgumentException("Delete requires deleter ID (Integer) and customer ID (String).");
         }
-        Integer deletedByUserId = (Integer) args[0];
-        String customerId  = (String) args[1];
+
+        String customerIdStr = (String) args[1];
         Connection connection = null;
 
         try {
             connection = DBConnection.getConnection();
             connection.setAutoCommit(false);
 
-            logger.log(Level.INFO,"Attempting to soft delete Account Number",customerId );
+            logger.log(Level.INFO, "Attempting to soft delete Customer ID " + customerIdStr);
 
-            if (!customerDAO.existsByAccountNumber(connection, customerId )) {
+            int customerId = Integer.parseInt(customerIdStr);
+
+            if (!customerDAO.existsById(connection, customerId)) {
                 throw new CustomException(CustomException.ExceptionType.CUSTOMER_NOT_FOUND);
             }
 
-            boolean isDeleted = customerDAO.delete(connection, customerId , deletedByUserId);
+            boolean isDeleted = customerDAO.delete(connection, customerId);
             if (isDeleted) {
                 connection.commit();
-                logger.log(Level.INFO,"Customer deleted successfully",customerId );
+                logger.log(Level.INFO, "Customer deleted successfully: " + customerId);
                 return true;
-            }else {
+            } else {
                 connection.rollback();
-                logger.log(Level.INFO,"Customer delete failed",customerId );
+                logger.log(Level.INFO, "Customer delete failed: " + customerId);
                 throw new CustomException(CustomException.ExceptionType.CUSTOMER_DELETION_FAILED);
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             DBConnection.rollback(connection);
-            logger.log(Level.SEVERE, "Error during customer deleting for Id" + customerId );
+            logger.log(Level.SEVERE, "Error during customer deleting for Id" + customerIdStr);
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
-        }finally {
+        } finally {
             DBConnection.closeConnection(connection);
         }
     }

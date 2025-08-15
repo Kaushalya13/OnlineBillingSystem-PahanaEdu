@@ -247,7 +247,7 @@
 
     function showMessage(message, type = 'success') {
         messageText.textContent = message;
-        messageDisplay.className = 'p-4 mb-4 text-sm rounded-lg'; // Reset classes
+        messageDisplay.className = 'p-4 mb-4 text-sm rounded-lg';
         messageDisplay.classList.add(type === 'success' ? 'bg-green-100' : 'bg-red-100', type === 'success' ? 'text-green-800' : 'text-red-800');
         setTimeout(() => {
             messageDisplay.classList.add('hidden');
@@ -272,6 +272,7 @@
 
     // --- API Call Functions ---
     async function fetchCustomer(searchTerm = '') {
+        showLoading(true);
         let url = getContextPath() + '/customers';
         if (searchTerm) {
             url += '?search=' + encodeURIComponent(searchTerm);
@@ -311,9 +312,9 @@
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' + customer.cus_AccountNumber + '</td>';
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' + parseFloat(customer.units_consumed).toFixed(2) + '</td>';
 
-            rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">';
+            rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-left">';
 
-            rowHtml += '<button title="View Item Details" class="text-blue-600 hover:text-blue-900 mr-3 view-btn" data-customer-id="' + customer.cus_Id + '">' +
+            rowHtml += '<button title="View Customer Details" class="text-blue-600 hover:text-blue-900 mr-3 view-btn" data-customer-id="' + customer.cus_Id + '">' +
                 '<i data-feather="eye" class="w-4 h-4 inline-block align-middle"></i></button>';
 
             let canEdit = false;
@@ -437,9 +438,8 @@
         if (!confirm('Are you sure you want to delete this customer?')) return;
         try {
             let url = getContextPath() + '/customers?id=' + encodeURIComponent(id);
-            const response = await fetch(url,{method: 'DELETE'});
+            const response = await fetch(url, {method: 'DELETE'});
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to delete customer.');
             }

@@ -121,19 +121,11 @@ public class CustomerDAOImpl implements CustomerDAO {
         if (args.length == 0 || args[0] == null) {
             throw new IllegalArgumentException("Customer ID must be provided to delete.");
         }
-
-        Integer customerId;
-        try {
-            customerId = (Integer) args[0];
-        }catch (CustomException e){
-            throw new IllegalArgumentException("Customer ID must be provided to delete.");
-        }
-
+        Integer customerId = (Integer) args[0];
         String sql = "UPDATE customers SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL";
-
         try {
             return DAOUtil.executeUpdate(connection, sql, customerId);
-        }catch (CustomException e){
+        } catch (RuntimeException e){
             logger.log(Level.SEVERE, "Database error while deleting Customer: " + customerId + ":" + e.getMessage(), e);
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         }
@@ -141,9 +133,8 @@ public class CustomerDAOImpl implements CustomerDAO {
 
     @Override
     public boolean existsById(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
-        String sql = "SELECT * FROM customers WHERE = id ? AND deleted_at IS NULL";
+        String sql = "SELECT * FROM customers WHERE id = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
-
         try {
             resultSet = DAOUtil.executeQuery(connection, sql, args);
             return resultSet.next();
