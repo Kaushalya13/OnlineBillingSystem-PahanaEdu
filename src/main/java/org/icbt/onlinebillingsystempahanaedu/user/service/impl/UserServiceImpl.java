@@ -1,6 +1,7 @@
 package org.icbt.onlinebillingsystempahanaedu.user.service.impl;
 
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
+import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.core.util.PasswordSecurityUtil;
 import org.icbt.onlinebillingsystempahanaedu.user.entity.UserEntity;
 import org.icbt.onlinebillingsystempahanaedu.user.mapper.UserMapper;
@@ -9,6 +10,7 @@ import org.icbt.onlinebillingsystempahanaedu.user.dao.impl.UserDAOImpl;
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
 import org.icbt.onlinebillingsystempahanaedu.user.service.UserService;
 
+import javax.swing.undo.CannotUndoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,7 +25,6 @@ import java.util.logging.Logger;
  */
 
 public class UserServiceImpl implements UserService {
-    private final Connection connection = DBConnection.getConnection();
     private final UserDAO userDAO;
     private static final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
             connection.setAutoCommit(false);
 
             if (userDAO.findByUsername(connection, dto.getUsername()) != null) {
-                throw new SQLException("Username already exists");
+                throw new CustomException(CustomException.ExceptionType.USER_ALREADY_EXISTS);
             }
 
             String hashedPassword = PasswordSecurityUtil.hashPassword(dto.getPassword());
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
         } catch (SQLException e) {
             DBConnection.rollback(connection);
             logger.log(Level.SEVERE, "Failed to add user: " + e.getMessage(), e);
-            throw e;
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
@@ -87,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Database error during searchById: " + e.getMessage(), e);
-            throw e;
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
@@ -105,12 +106,11 @@ public class UserServiceImpl implements UserService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Database error during getAll users: " + e.getMessage(), e);
-            throw e;
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
     }
-
 
     @Override
     public boolean update(UserDTO dto) throws SQLException, ClassNotFoundException {
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
 
             UserEntity existingUser = userDAO.searchById(connection, dto.getId());
             if (existingUser == null) {
-                throw new SQLException("User not found for update");
+                throw new CustomException(CustomException.ExceptionType.USER_NOT_FOUND);
             }
 
             if (dto.getPassword() != null && !dto.getPassword().isEmpty() &&
@@ -148,26 +148,24 @@ public class UserServiceImpl implements UserService {
         } catch (SQLException e) {
             DBConnection.rollback(connection);
             logger.log(Level.SEVERE, "Failed to update user: " + e.getMessage(), e);
-            throw e;
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
     }
 
-
     @Override
     public boolean delete(Object... args) throws SQLException, ClassNotFoundException {
-        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof Integer)) {
+        if (args.length < 1 || !(args[0] instanceof Integer)) {
             throw new IllegalArgumentException("Delete requires user ID and deletedBy user ID.");
         }
 
         Integer userId = (Integer) args[0];
-        Integer deletedBy = (Integer) args[1];
 
         final int INITIAL_ADMIN_ID = 1;
         if (userId.equals(INITIAL_ADMIN_ID)) {
             logger.warning("Attempt to delete initial admin user (ID: " + INITIAL_ADMIN_ID + ") was blocked.");
-            throw new SQLException("Unauthorized: Cannot delete the initial admin user.");
+            throw new CustomException(CustomException.ExceptionType.UNAUTHORIZED_ACCESS);
         }
 
         Connection connection = null;
@@ -177,7 +175,7 @@ public class UserServiceImpl implements UserService {
 
             UserEntity existingUser = userDAO.searchById(connection, userId);
             if (existingUser == null) {
-                throw new SQLException("User not found for deletion.");
+                throw new CustomException(CustomException.ExceptionType.USER_NOT_FOUND);
             }
 
             boolean isDeleted = userDAO.delete(connection, userId);
@@ -193,12 +191,11 @@ public class UserServiceImpl implements UserService {
         } catch (SQLException e) {
             DBConnection.rollback(connection);
             logger.log(Level.SEVERE, "Failed to delete user: " + e.getMessage(), e);
-            throw e;
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
             DBConnection.closeConnection(connection);
         }
     }
-
 
     @Override
     public UserDTO loginUser(String username, String password) throws SQLException, ClassNotFoundException {
@@ -225,6 +222,21 @@ public class UserServiceImpl implements UserService {
             logger.log(Level.SEVERE, "Error during user login: " + e.getMessage(), e);
             throw e;
         } finally {
+            DBConnection.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public UserDTO findByUsername(String username) throws SQLException, ClassNotFoundException {
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+            UserEntity userEntity = userDAO.findByUsername(connection, username);
+            return UserMapper.convertUserEntityToUserDTO(userEntity);
+        }catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error during user findByUsername: " + e.getMessage(), e);
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        }finally {
             DBConnection.closeConnection(connection);
         }
     }
