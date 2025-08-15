@@ -13,5 +13,6 @@ import java.sql.SQLException;
 public interface UserService extends CrudService<UserDTO> {
 
     UserDTO loginUser(String username, String password) throws SQLException, ClassNotFoundException;
+    UserDTO findByUsername(String username) throws SQLException, ClassNotFoundException;
 
 }

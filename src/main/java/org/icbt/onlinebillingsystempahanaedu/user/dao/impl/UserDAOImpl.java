@@ -2,6 +2,7 @@ package org.icbt.onlinebillingsystempahanaedu.user.dao.impl;
 
 import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
+import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.core.util.DAOUtil;
 import org.icbt.onlinebillingsystempahanaedu.user.dao.UserDAO;
 import org.icbt.onlinebillingsystempahanaedu.user.entity.UserEntity;
@@ -21,18 +22,32 @@ import java.util.logging.Logger;
  * time : 7:15 PM
  */
 public class UserDAOImpl implements UserDAO {
-    private static final Logger log = Logger.getLogger(UserDAOImpl.class.getName());
+    private static final Logger logger = Logger.getLogger(UserDAOImpl.class.getName());
 
     @Override
     public List<UserEntity> getAll(Connection connection, Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
         List<UserEntity> userList = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE deleted_at IS NULL");
+        List<Object> params = new ArrayList<>();
+        if (searchParams != null) {
+            String searchValue = searchParams.get("search");
+            if (searchValue != null && !searchValue.trim().isEmpty()) {
+                sql.append(" AND (username LIKE ? OR role LIKE ?)");
+                params.add("%" + searchValue.trim() + "%");
+                params.add("%" + searchValue.trim() + "%");
+            }
+        }
+
+        sql.append(" ORDER BY id ASC");
+
         ResultSet resultSet = null;
 
         try {
-            resultSet = DAOUtil.executeQuery(
-                    connection,
-                    "SELECT * FROM users WHERE deleted_at IS NULL"
-            );
+            if (!params.isEmpty()) {
+                resultSet = DAOUtil.executeQuery(connection, sql.toString(), params.toArray());
+            }else {
+                resultSet = DAOUtil.executeQuery(connection, sql.toString());
+            }
 
             while (resultSet.next()) {
                 userList.add(mapResultSetToUserEntity(resultSet));
@@ -44,21 +59,16 @@ public class UserDAOImpl implements UserDAO {
         return userList;
     }
 
-
     @Override
     public UserEntity searchById(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
-        if (args == null || args.length == 0 || args[0] == null) {
-            throw new IllegalArgumentException("User ID must be provided.");
+        if (args.length == 0 || !(args[0] instanceof Integer)) {
+            throw new IllegalArgumentException("ID parameter is required and must be an Integer.");
         }
-
+        int id = (Integer) args[0];
+        String sql = "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
         try {
-            resultSet = DAOUtil.executeQuery(
-                    connection,
-                    "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL",
-                    args[0]
-            );
-
+            resultSet = DAOUtil.executeQuery(connection,sql,id);
             if (resultSet.next()) {
                 return mapResultSetToUserEntity(resultSet);
             }
@@ -68,41 +78,62 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
-
     @Override
     public boolean add(Connection connection, UserEntity entity) throws SQLException, ClassNotFoundException {
-        return DAOUtil.executeUpdate(
-                connection,
-                "INSERT INTO users (username,password,role) VALUES (?,?,?)",
-                entity.getUsername(),
-                entity.getPassword(),
-                entity.getRole().name()
-        );
+        String sql = "INSERT INTO users (username,password,role) VALUES (?,?,?)";
+
+        try {
+            return DAOUtil.executeUpdate(
+                    connection, sql,
+                    entity.getUsername(),
+                    entity.getPassword(),
+                    entity.getRole().name()
+            );
+        }catch (CustomException e){
+            logger.log(Level.SEVERE,"Database error while adding User :"+ e.getMessage(),e);
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        }
     }
 
     @Override
     public boolean update(Connection connection, UserEntity entity) throws SQLException, ClassNotFoundException {
-        return DAOUtil.executeUpdate(
-                connection,
-                "UPDATE users SET username = ?, password = ?, role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
-                entity.getUsername(),
-                entity.getPassword(),
-                entity.getRole().name(),
-                entity.getId()
-        );
+        String sql = "UPDATE users SET username=?,password=?,role=?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL";
+
+        try {
+            return DAOUtil.executeUpdate(
+                    connection, sql,
+                    entity.getUsername(),
+                    entity.getPassword(),
+                    entity.getRole().name(),
+                    entity.getId()
+            );
+        } catch (CustomException e) {
+            logger.log(Level.SEVERE, "Database error while Updating User :" + e.getMessage(), e);
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        }
     }
 
     @Override
     public boolean delete(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
-        if (args == null || args.length == 0 || args[0] == null) {
-            throw new IllegalArgumentException("User ID must be provided for deletion.");
+        if (args.length == 0 || args[0] == null) {
+            throw new IllegalArgumentException("User ID must be provided to delete.");
         }
 
-        return DAOUtil.executeUpdate(
-                connection,
-                "UPDATE users SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL",
-                args[0]
-        );
+        Integer userId;
+        try {
+            userId = (Integer) args[0];
+        }catch (CustomException e){
+            throw new IllegalArgumentException("User ID must be provided to delete.");
+        }
+
+        String sql = "UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL";
+
+        try {
+            return DAOUtil.executeUpdate(connection,sql,userId);
+        }catch (CustomException e){
+            logger.log(Level.SEVERE,"Database error while Deleting User :"+ userId + ":" + e.getMessage(),e);
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        }
     }
 
     @Override
