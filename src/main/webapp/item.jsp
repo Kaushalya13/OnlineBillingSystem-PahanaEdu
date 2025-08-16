@@ -107,6 +107,20 @@
         .btn-danger:hover {
             background-color: #b91c1c;
         }
+
+        .form-input-modern.is-invalid {
+            border-color: #ef4444; /* red-500 */
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); /* red-500 with transparency */
+        }
+        .form-input-modern.is-invalid:focus {
+            border-color: #b91c1c; /* red-700 */
+            box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.2);
+        }
+        .validation-message {
+            color: #ef4444; /* red-500 */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem; /* mt-1 */
+        }
     </style>
 </head>
 <body class="font-sans text-gray-900" data-context-path="<%= request.getContextPath() %>">
@@ -294,6 +308,51 @@
         modal.classList.add('hidden');
     }
 
+    function validateField(field) {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            const parent = field.parentElement;
+            let errorMessage = parent.querySelector('.validation-message');
+            if (!errorMessage) {
+                errorMessage = document.createElement('p');
+                errorMessage.className = 'validation-message';
+                parent.appendChild(errorMessage);
+            }
+            errorMessage.textContent = 'Please fill out this field.';
+            return false;
+        } else {
+            field.classList.remove('is-invalid');
+            const errorMessage = field.parentElement.querySelector('.validation-message');
+            if (errorMessage) {
+                errorMessage.remove();
+            }
+            return true;
+        }
+    }
+
+    function validateForm(form) {
+        let isFormValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+
+        requiredFields.forEach(field => {
+            if (!validateField(field)) {
+                isFormValid = false;
+            }
+        });
+
+        return isFormValid;
+    }
+
+    function resetFormValidation(form) {
+        form.querySelectorAll('.is-invalid').forEach(field => {
+            field.classList.remove('is-invalid');
+        });
+
+        form.querySelectorAll('.validation-message').forEach(message => {
+            message.remove();
+        });
+    }
+
     // --- API Call Functions ---
     async function fetchItems(searchTerm = '') {
         let url = getContextPath() + '/items';
@@ -336,7 +395,7 @@
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' + item.itemName + '</td>';
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rs. ' + parseFloat(item.unitPrice).toFixed(2) + '</td>';
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">';
-            rowHtml += '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + (item.quantity < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800') + '">' + item.quantity + ' stock</span>';
+            rowHtml += '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + (item.quantity < 10 ? 'bg-white text-black' : 'bg-white text-black') + '">' + item.quantity + ' stock</span>';
             rowHtml += '</td>';
             rowHtml += '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">';
 
@@ -424,6 +483,13 @@
 
     async function handleItemFormSubmit(e) {
         e.preventDefault();
+
+        if (!validateForm(itemForm)) {
+            showMessage('Please correct the highlighted fields.', 'error');
+            return;
+        }
+
+
         const id = document.getElementById('itemId').value;
         const isEdit = !!id;
         const formData = new URLSearchParams(new FormData(itemForm));
@@ -497,6 +563,21 @@
         refreshBtn.addEventListener('click', () => fetchItems(searchInput.value));
         itemForm.addEventListener('submit', handleItemFormSubmit);
         searchInput.addEventListener('input', handleSearchInput);
+
+        itemForm.querySelectorAll('input').forEach(field => {
+            field.addEventListener('blur', () => validateField(field));
+        });
+
+        itemModal.addEventListener('click', e => {
+            if (e.target.closest('.close-modal-btn')) {
+                closeModal(itemModal);
+                resetFormValidation(itemForm);
+            }
+        });
+        itemForm.querySelector('.btn-secondary').addEventListener('click', () => {
+            closeModal(itemModal);
+            resetFormValidation(itemForm);
+        });
 
         document.body.addEventListener('click', (e) => {
             const viewBtn = e.target.closest('.view-btn');
