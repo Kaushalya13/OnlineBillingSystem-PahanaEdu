@@ -37,7 +37,7 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public boolean findItemById(Connection connection, Integer id) throws SQLException, ClassNotFoundException {
-        String sql = "select * from items where id = ? AND deleted_at IS NULL";
+        String sql = "select * FROM items WHERE id = ? AND deleted_at IS NULL";
         ResultSet resultSet = null;
         try {
             resultSet = DAOUtil.executeQuery(connection, sql, id);
@@ -92,7 +92,6 @@ public class ItemDAOImpl implements ItemDAO {
         }
     }
 
-
     @Override
     public List<ItemEntity> getAll(Connection connection, Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
         List<ItemEntity> items = new ArrayList<>();
@@ -122,7 +121,6 @@ public class ItemDAOImpl implements ItemDAO {
         return items;
     }
 
-
     @Override
     public ItemEntity searchById(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
         if (args.length == 0 || !(args[0] instanceof Integer)) {
@@ -144,7 +142,6 @@ public class ItemDAOImpl implements ItemDAO {
         }
     }
 
-
     @Override
     public boolean update(Connection connection, ItemEntity entity) throws SQLException, ClassNotFoundException {
         String sql = "UPDATE items SET item_name = ?, unit_price = ?, quantity = ? WHERE id = ? AND deleted_at IS NULL";
@@ -161,20 +158,13 @@ public class ItemDAOImpl implements ItemDAO {
         }
     }
 
-
     @Override
     public boolean delete(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
         if (args.length == 0 || args[0] == null) {
             throw new IllegalArgumentException("Item ID must be provided to delete.");
         }
 
-        Integer itemId;
-        try {
-            itemId = (Integer) args[0];
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Item ID must be an Integer.");
-        }
-
+        Integer itemId = (Integer) args[0];
         String sql = "UPDATE items SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL";
 
         try {
@@ -184,7 +174,6 @@ public class ItemDAOImpl implements ItemDAO {
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         }
     }
-
 
     private ItemEntity mapResultSetToItemEntity(ResultSet resultSet) throws SQLException {
         ItemEntity itemEntity = new ItemEntity();

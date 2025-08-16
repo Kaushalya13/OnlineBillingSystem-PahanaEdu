@@ -45,7 +45,6 @@ public class ItemController extends HttpServlet {
         userService = new UserServiceImpl();
     }
 
-    // Helper to get userId from session
     private Integer getUserIdFromSession(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("userId") != null) {
@@ -54,7 +53,6 @@ public class ItemController extends HttpServlet {
         return null;
     }
 
-    // Helper to get user role from session
     private String getUserRoleFromSession(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("role") != null) {
@@ -63,7 +61,6 @@ public class ItemController extends HttpServlet {
         return null;
     }
 
-    // Main method using the helper to avoid duplication
     private Map<String, Object> itemDtoToMap(ItemDTO dto) {
         if (dto == null) return null;
 
@@ -79,8 +76,6 @@ public class ItemController extends HttpServlet {
         return map;
     }
 
-
-    // Helper to safely decode URL-encoded strings
     private String safeDecode(String value) {
         try {
             return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
@@ -90,7 +85,6 @@ public class ItemController extends HttpServlet {
         }
     }
 
-    // Helper to parse x-www-form-urlencoded body for POST/PUT
     private Map<String, String> parseUrlEncodedBody(HttpServletRequest req) throws IOException {
         Map<String, String> params = new HashMap<>();
         try (BufferedReader reader = req.getReader()) {
@@ -130,7 +124,6 @@ public class ItemController extends HttpServlet {
             String unitPriceStr = req.getParameter("unitPrice");
             String quantityStr = req.getParameter("quantity");
 
-            // Basic validation
             if (dto.getItemName() == null || dto.getItemName().trim().isEmpty() ||
                     unitPriceStr == null || unitPriceStr.trim().isEmpty() ||
                     quantityStr == null || quantityStr.trim().isEmpty()) {
@@ -263,7 +256,6 @@ public class ItemController extends HttpServlet {
             Integer itemId = Integer.parseInt(idStr);
 
             if ("restock".equals(action)) {
-                // Restock action
                 String qtyToAddStr = params.get("quantityToAdd");
                 if (qtyToAddStr == null || qtyToAddStr.isEmpty()) {
                     SendResponse.sendJson(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Quantity to add is required for restock."));
@@ -284,7 +276,6 @@ public class ItemController extends HttpServlet {
 
             }
             else if ("update".equalsIgnoreCase(action)) {
-                // Update action
                 ItemDTO dto = new ItemDTO();
                 dto.setId(itemId);
                 dto.setItemName(params.get("itemName"));
@@ -355,7 +346,6 @@ public class ItemController extends HttpServlet {
         String currentUserRole = getUserRoleFromSession(req);
         Integer currentUserId = getUserIdFromSession(req);
 
-        // Only ADMIN with initial ID can delete
         if (!"ADMIN".equals(currentUserRole) || (currentUserId == null || !currentUserId.equals(INITIAL_ADMIN_ID))) {
             SendResponse.sendJson(resp, HttpServletResponse.SC_FORBIDDEN,
                     Map.of("message", "Unauthorized: Only the Initial Admin can delete items."));
@@ -369,8 +359,7 @@ public class ItemController extends HttpServlet {
         }
 
         try {
-            int itemId = Integer.parseInt(idStr);
-            boolean deleted = itemService.delete(currentUserId, itemId);
+            boolean deleted = itemService.delete(currentUserId, idStr);
 
             if (deleted) {
                 SendResponse.sendJson(resp, HttpServletResponse.SC_OK, Map.of("message", "Item deleted successfully."));

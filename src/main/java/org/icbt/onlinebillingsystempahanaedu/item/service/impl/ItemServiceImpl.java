@@ -52,7 +52,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     @Override
     public boolean add(ItemDTO dto) throws SQLException, ClassNotFoundException {
         Connection connection = null;
@@ -62,15 +61,12 @@ public class ItemServiceImpl implements ItemService {
 
             logger.log(Level.INFO, "Adding new item: {0}", dto.getItemName());
 
-            // Check if the item already exists
             if (itemDAO.existsByName(connection, dto.getItemName())) {
                 throw new CustomException(CustomException.ExceptionType.ITEM_ALREADY_EXISTS);
             }
 
-            // Convert DTO to Entity
             ItemEntity itemEntity = ItemMapper.convertItemDTOToItemEntity(dto);
 
-            // Attempt to insert into DB
             boolean added = itemDAO.add(connection, itemEntity);
 
             if (added) {
@@ -91,7 +87,6 @@ public class ItemServiceImpl implements ItemService {
             DBConnection.closeConnection(connection);
         }
     }
-
 
     @Override
     public ItemDTO searchById(Object... args) throws SQLException, ClassNotFoundException {
@@ -124,7 +119,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     @Override
     public List<ItemDTO> getAll(Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
         Connection connection = null;
@@ -140,7 +134,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     @Override
     public boolean update(ItemDTO dto) throws SQLException, ClassNotFoundException {
         Connection connection = null;
@@ -150,20 +143,17 @@ public class ItemServiceImpl implements ItemService {
 
             logger.info("Starting update for item ID: " + dto.getId() + ", Name: " + dto.getItemName());
 
-            // Check if item exists
             ItemEntity existingItem = itemDAO.searchById(connection, dto.getId());
             if (existingItem == null) {
                 throw new CustomException(CustomException.ExceptionType.ITEM_NOT_FOUND);
             }
 
-            // Check name uniqueness (excluding current item)
             if (!existingItem.getItemName().equals(dto.getItemName())) {
                 if (itemDAO.existsByName(connection, dto.getItemName())) {
                     throw new CustomException(CustomException.ExceptionType.ITEM_ALREADY_EXISTS);
                 }
             }
 
-            // Convert DTO to Entity and update
             ItemEntity updatedEntity = ItemMapper.convertItemDTOToItemEntity(dto);
             boolean isUpdated = itemDAO.update(connection, updatedEntity);
 
@@ -186,29 +176,27 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     @Override
     public boolean delete(Object... args) throws SQLException, ClassNotFoundException {
-        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof Integer)) {
-            throw new IllegalArgumentException("Delete requires deleter ID (Integer) and item ID (Integer).");
+        if (args.length < 2 || !(args[0] instanceof Integer) || !(args[1] instanceof String)) {
+            throw new IllegalArgumentException("Delete requires deleter ID (Integer) and item ID (String).");
         }
-        Integer deletedByUserId = (Integer) args[0];
-        Integer itemId = (Integer) args[1];
 
+        String itemIdStr = (String) args[1];
         Connection connection = null;
         try {
             connection = DBConnection.getConnection();
             connection.setAutoCommit(false);
 
-            logger.info("Attempting to soft delete item ID: " + itemId + " by user ID: " + deletedByUserId);
+            logger.info("Attempting to soft delete item ID: " + itemIdStr);
 
-            // Check if item exists
+            int itemId = Integer.parseInt(itemIdStr);
+
             if (!itemDAO.findItemById(connection, itemId)) {
                 throw new CustomException(CustomException.ExceptionType.ITEM_NOT_FOUND);
             }
 
-            // Perform delete (soft delete)
-            boolean isDeleted = itemDAO.delete(connection, deletedByUserId, itemId);
+            boolean isDeleted = itemDAO.delete(connection, itemId);
 
             if (isDeleted) {
                 connection.commit();
@@ -221,9 +209,7 @@ public class ItemServiceImpl implements ItemService {
             }
 
         } catch (SQLException e) {
-            if (connection != null) {
-                connection.rollback();
-            }
+            DBConnection.rollback(connection);
             logger.severe("Database error during item soft delete: " + e.getMessage());
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
@@ -246,7 +232,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     @Override
     public boolean restockItem(Integer itemId, int quantityToAdd) throws SQLException, ClassNotFoundException {
         if (itemId == null || quantityToAdd <= 0) {
@@ -268,14 +253,12 @@ public class ItemServiceImpl implements ItemService {
 
             int newQuantity = existingItem.getQuantity() + quantityToAdd;
 
-            // Prepare DTO for update
             ItemDTO updateDto = new ItemDTO();
             updateDto.setId(itemId);
             updateDto.setItemName(existingItem.getItemName());
             updateDto.setUnitPrice(existingItem.getUnitPrice());
             updateDto.setQuantity(newQuantity);
 
-            // Convert DTO to entity and update
             ItemEntity updatedEntity = ItemMapper.convertItemDTOToItemEntity(updateDto);
             boolean isRestocked = itemDAO.update(connection, ItemMapper.convertItemDTOToItemEntity(updateDto));
 
