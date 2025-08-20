@@ -130,55 +130,60 @@
 <input type="hidden" id="initialAdminId" value="1">
 
 <div class="ml-64 p-8">
-    <div class="flex justify-between items-center mb-10">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
         <h1 class="text-4xl font-extrabold text-gray-900 flex items-center gap-4">
             <i data-feather="box" class="w-8 h-8 text-blue-500"></i> Item Management
         </h1>
-    </div>
-
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div class="flex flex-wrap items-center gap-4">
-            <input type="text" id="searchInput" placeholder="Search by name..."
-                   class="form-input-modern w-full md:w-80"/>
-            <button id="refreshBtn"
-                    class="bg-gray-200 text-gray-800 font-semibold px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                Refresh
-            </button>
-        </div>
         <c:if test="${sessionScope.role == 'ADMIN'}">
             <button id="openAddItemModalBtn"
-                    class="btn-success font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md flex items-center">
-                <i data-feather="plus" class="w-4 h-4 inline-block mr-2"></i> Add Item
+                    class="btn-success font-semibold py-2 px-5 rounded-lg transition-colors duration-200 shadow-md flex items-center">
+                <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i> Add Item
             </button>
         </c:if>
     </div>
 
-    <div class="card-light p-8 rounded-2xl">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Item List</h2>
-
-        <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
-            <span id="messageText"></span>
+    <div class="bg-white rounded-lg shadow-md border border-gray-200">
+        <div class="p-4 border-b flex flex-col sm:flex-row items-center gap-4">
+            <div class="relative flex-grow w-full sm:w-auto">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i data-feather="search" class="w-4 h-4 text-gray-400"></i>
+                </div>
+                <input type="text" id="searchInput" placeholder="Search by name"
+                       class="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-sm"/>
+            </div>
+            <button id="refreshBtn"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md inline-flex items-center shadow-sm">
+                <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i> Refresh
+            </button>
         </div>
 
-        <div id="loadingIndicator" class="text-center py-8 hidden">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
-            <p class="text-gray-600 mt-3">Loading items...</p>
-        </div>
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Item Details</h2>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto">
-                <thead class="bg-gray-100 text-gray-700 font-bold">
-                <tr>
-                    <th class="px-6 py-3 text-left rounded-tl-xl">ID</th>
-                    <th class="px-6 py-3 text-left">Item Name</th>
-                    <th class="px-6 py-3 text-left">Unit Price</th>
-                    <th class="px-6 py-3 text-left">Stock</th>
-                    <th class="px-6 py-3 text-center rounded-tr-xl">Actions</th>
-                </tr>
-                </thead>
-                <tbody id="itemTableBody">
-                </tbody>
-            </table>
+            <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
+                <span id="messageText"></span>
+            </div>
+
+            <div id="loadingIndicator" class="text-center py-8 hidden">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
+                <p class="text-gray-600 mt-3">Loading items...</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-100 text-gray-700 font-bold">
+                    <tr>
+                        <th class="px-6 py-3 text-left rounded-tl-xl">ID</th>
+                        <th class="px-6 py-3 text-left">Item Name</th>
+                        <th class="px-6 py-3 text-left">Unit Price</th>
+                        <th class="px-6 py-3 text-left">Stock</th>
+                        <th class="px-6 py-3 text-center rounded-tr-xl">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="itemTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -194,18 +199,21 @@
             <input type="hidden" id="itemId" name="id">
             <div>
                 <label for="itemName" class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
-                <input type="text" id="itemName" name="itemName" required placeholder="Enter Item Name"
+                <input type="text" id="itemName" name="itemName"  placeholder="Enter Item Name"
                        class="form-input-modern w-full"/>
+                <p id="itemNameError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div>
                 <label for="unitPrice" class="block text-sm font-medium text-gray-700 mb-1">Unit Price</label>
-                <input type="number" id="unitPrice" name="unitPrice" required step="0.01" min="0"
+                <input type="number" id="unitPrice" name="unitPrice"  step="0.01" min="0"
                        placeholder="Enter Unit Price" class="form-input-modern w-full"/>
+                <p id="unitPriceError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div>
                 <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
-                <input type="number" id="quantity" name="quantity" required min="0" placeholder="Enter Stock Quantity"
+                <input type="number" id="quantity" name="quantity"  min="0" placeholder="Enter Stock Quantity"
                        class="form-input-modern w-full"/>
+                <p id="quantityError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div class="flex justify-end gap-4 mt-6">
                 <button type="button" class="close-modal-btn btn-secondary font-semibold px-6 py-3 rounded-lg">
@@ -240,38 +248,10 @@
     </div>
 </div>
 
-<div id="restockModal" class="fixed inset-0 hidden modal-overlay items-center justify-center z-50">
-    <div class="modal-content bg-white p-8 rounded-2xl shadow-xl w-full max-w-md mx-4">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Restock Item</h2>
-            <button class="close-modal-btn text-gray-500 hover:text-gray-700"><i data-feather="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-        <form id="restockForm" class="space-y-6">
-            <input type="hidden" id="restockItemId" name="id">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
-                <p id="restockItemName" class="p-3 bg-gray-100 rounded-lg font-semibold"></p>
-            </div>
-            <div>
-                <label for="quantityToAdd" class="block text-sm font-medium text-gray-700 mb-1">Quantity to Add</label>
-                <input type="number" id="quantityToAdd" name="quantityToAdd" required min="1" value="1"
-                       class="form-input-modern w-full"/>
-            </div>
-            <div class="flex justify-end gap-4 mt-6">
-                <button type="button" class="close-modal-btn btn-secondary font-semibold px-6 py-3 rounded-lg">Cancel
-                </button>
-                <button type="submit" class="btn-primary font-semibold px-6 py-3 rounded-lg">Add Stock</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
 
-    // --- 1. GLOBAL VARIABLE DECLARATIONS ---
     let itemTableBody, loadingIndicator, messageDisplay, messageText, searchInput, refreshBtn;
-    let itemModal, viewItemModal, restockModal, itemForm, restockForm;
+    let itemModal, viewItemModal, restockModal, itemForm;
     let searchTimeout;
     let contextPath;
 
@@ -308,52 +288,41 @@
         modal.classList.add('hidden');
     }
 
-    function validateField(field) {
-        if (!field.value.trim()) {
-            field.classList.add('is-invalid');
-            const parent = field.parentElement;
-            let errorMessage = parent.querySelector('.validation-message');
-            if (!errorMessage) {
-                errorMessage = document.createElement('p');
-                errorMessage.className = 'validation-message';
-                parent.appendChild(errorMessage);
-            }
-            errorMessage.textContent = 'Please fill out this field.';
-            return false;
-        } else {
-            field.classList.remove('is-invalid');
-            const errorMessage = field.parentElement.querySelector('.validation-message');
-            if (errorMessage) {
-                errorMessage.remove();
-            }
-            return true;
+    function resetValidation() {
+        document.querySelectorAll('#itemForm .error-message').forEach(el => {
+            el.classList.add('hidden');
+            el.textContent = '';
+        });
+    }
+
+    function validateItemForm() {
+        resetValidation();
+        let isValid = true;
+
+        const itemName = document.getElementById("itemName");
+        if (itemName.value.trim().length < 3) {
+            document.getElementById("itemNameError").textContent = "Item name must be at least 3 characters.";
+            document.getElementById("itemNameError").classList.remove("hidden");
+            isValid = false;
         }
+
+        const unitPrice = document.getElementById("unitPrice");
+        if (unitPrice.value < 0 || unitPrice.value.trim() === "") {
+            document.getElementById("unitPriceError").textContent = "Unit price cannot be empty or negative.";
+            document.getElementById("unitPriceError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        const quantity = document.getElementById("quantity");
+        if (quantity.value < 0 || quantity.value.trim() === "") {
+            document.getElementById("quantityError").textContent = "Stock quantity cannot be empty or negative.";
+            document.getElementById("quantityError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        return isValid;
     }
 
-    function validateForm(form) {
-        let isFormValid = true;
-        const requiredFields = form.querySelectorAll('[required]');
-
-        requiredFields.forEach(field => {
-            if (!validateField(field)) {
-                isFormValid = false;
-            }
-        });
-
-        return isFormValid;
-    }
-
-    function resetFormValidation(form) {
-        form.querySelectorAll('.is-invalid').forEach(field => {
-            field.classList.remove('is-invalid');
-        });
-
-        form.querySelectorAll('.validation-message').forEach(message => {
-            message.remove();
-        });
-    }
-
-    // --- API Call Functions ---
     async function fetchItems(searchTerm = '') {
         let url = getContextPath() + '/items';
         if (searchTerm) {
@@ -372,7 +341,6 @@
         }
     }
 
-    // --- Rendering Function ---
     function renderItems(items) {
 
         itemTableBody.innerHTML = '';
@@ -431,9 +399,9 @@
 
     }
 
-    // --- Event Handler Functions ---
     function handleOpenAddModal() {
         itemForm.reset();
+        resetValidation();
         document.getElementById('itemId').value = '';
         document.getElementById('modalTitle').textContent = 'Add New Item';
         openModal(itemModal);
@@ -461,6 +429,8 @@
     }
 
     async function handleOpenEditModal(id) {
+        itemForm.reset();
+        resetValidation();
         try {
             let url = getContextPath() + '/items?id=' + encodeURIComponent(id);
             const response = await fetch(url);
@@ -484,11 +454,7 @@
     async function handleItemFormSubmit(e) {
         e.preventDefault();
 
-        if (!validateForm(itemForm)) {
-            showMessage('Please correct the highlighted fields.', 'error');
-            return;
-        }
-
+        if (!validateItemForm()) return;
 
         const id = document.getElementById('itemId').value;
         const isEdit = !!id;
@@ -540,7 +506,6 @@
         searchTimeout = setTimeout(() => fetchItems(searchInput.value), 300);
     }
 
-    // --- 3. MAIN INITIALIZATION FUNCTION ---
     function initItemPage() {
         itemTableBody = document.getElementById('itemTableBody');
         loadingIndicator = document.getElementById('loadingIndicator');
@@ -552,7 +517,6 @@
         viewItemModal = document.getElementById('viewItemModal');
         restockModal = document.getElementById('restockModal');
         itemForm = document.getElementById('itemForm');
-        restockForm = document.getElementById('restockForm');
         const openAddItemModalBtn = document.getElementById('openAddItemModalBtn');
         const allModals = [itemModal, viewItemModal, restockModal];
 
@@ -564,25 +528,14 @@
         itemForm.addEventListener('submit', handleItemFormSubmit);
         searchInput.addEventListener('input', handleSearchInput);
 
-        itemForm.querySelectorAll('input').forEach(field => {
-            field.addEventListener('blur', () => validateField(field));
-        });
-
-        itemModal.addEventListener('click', e => {
-            if (e.target.closest('.close-modal-btn')) {
-                closeModal(itemModal);
-                resetFormValidation(itemForm);
-            }
-        });
-        itemForm.querySelector('.btn-secondary').addEventListener('click', () => {
+        const closeModalAndReset = () => {
             closeModal(itemModal);
-            resetFormValidation(itemForm);
-        });
+            resetValidation();
+        };
 
         document.body.addEventListener('click', (e) => {
             const viewBtn = e.target.closest('.view-btn');
             const editBtn = e.target.closest('.edit-btn');
-            const restockBtn = e.target.closest('.restock-btn');
             const deleteBtn = e.target.closest('.delete-btn');
             const closeModalBtn = e.target.closest('.close-modal-btn');
 
@@ -592,18 +545,30 @@
             if (deleteBtn) handleDeleteItem(deleteBtn.dataset.itemId);
         });
 
+        [itemModal, viewItemModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) {
+                        if (modal === itemModal) {
+                            closeModalAndReset();
+                        } else {
+                            closeModal(modal);
+                        }
+                    }
+                });
+            }
+        });
+
         allModals.forEach(modal => {
             if (modal) {
                 modal.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
             }
         });
 
-        // --- Initial Data Load ---
         fetchItems();
         feather.replace();
     }
 
-    // --- 4. ENTRY POINT ---
     document.addEventListener('DOMContentLoaded', initItemPage);
 </script>
 </body>

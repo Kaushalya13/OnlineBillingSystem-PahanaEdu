@@ -8,11 +8,17 @@
   <script src="https://unpkg.com/feather-icons"></script>
 
   <style>
-    .left-side-gradient {
-      background: linear-gradient(135deg, #6B46C1 0%, #805AD5 100%);
+    .left-side-bg {
+      background-color: #1e3a8a;
     }
     input:focus {
-      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.4);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.4);
+    }
+    .login-button {
+      background-color: #2563eb;
+    }
+    .login-button:hover {
+      background-color: #1d4ed8;
     }
   </style>
 </head>
@@ -20,29 +26,33 @@
 
 <div class="flex bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-5xl mx-4 my-8">
 
-  <div class="w-1/2 left-side-gradient hidden md:flex flex-col items-center justify-center p-10 text-white relative">
-    <div class="absolute top-8 left-8">
-      <div class="flex items-center text-4xl font-bold text-black">
-        <i data-feather="book-open" class="w-24 h-24 mb-6 opacity-80 mr-3"></i>
-        Pahana Edu
+  <div class="w-1/2 left-side-bg hidden md:flex flex-col items-center justify-center p-10 text-white relative overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2070&auto=format&fit=crop"
+         alt="Modern library interior"
+         class="absolute inset-0 w-full h-full object-cover opacity-45">
+
+    <div class="relative z-10 text-center">
+      <div class="flex items-center justify-center text-4xl font-bold text-white mb-6">
+        <i data-feather="book-open" class="w-12 h-12 mr-4"></i>
+        <span>Pahana Edu</span>
       </div>
+      <h2 class="text-3xl font-extrabold mb-4 leading-tight">Your Gateway to Seamless Bookshop Management</h2>
+      <p class="text-md opacity-80">Efficiently manage customer accounts and streamline billing for your bookshop operations.</p>
     </div>
-    <div class="text-center">
-      <h2 class="text-4xl font-extrabold mb-4 leading-tight">Your Gateway to Sexamless Bookshop Management</h2>
-      <p class="text-md opacity-90 text-black">Efficiently manage customer accounts and streamline billing for your bookshop operations.</p>
-    </div>
-    <div class="absolute bottom-8 right-8 text-sm opacity-70">
+
+    <div class="absolute bottom-8 right-8 text-sm z-10">
       © 2025 All Rights Reserved.
     </div>
   </div>
 
   <div class="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
-    <div class="text-center mb-8 md:hidden"> <div class="flex items-center justify-center text-3xl font-bold text-gray-800 mb-3">
-      <div class="w-14 h-14 bg-purple-600 text-white rounded-full flex items-center justify-center mr-3 shadow-lg">
-        <i data-feather="book-open" class="w-6 h-6"></i>
+    <div class="text-center mb-8 md:hidden">
+      <div class="flex items-center justify-center text-3xl font-bold text-gray-800 mb-3">
+        <div class="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 shadow-lg">
+          <i data-feather="book-open" class="w-6 h-6"></i>
+        </div>
+        Pahana Edu
       </div>
-      Pahana Edu
-    </div>
       <p class="text-gray-600 text-sm mt-1">Online Billing System</p>
     </div>
 
@@ -57,7 +67,7 @@
             <i data-feather="user" class="w-5 h-5"></i>
           </span>
           <input type="text" id="username" name="username" placeholder="Your username" required
-                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:border-purple-500 focus:outline-none transition duration-200"/>
+                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:border-blue-500 focus:outline-none transition duration-200"/>
         </div>
       </div>
 
@@ -68,23 +78,13 @@
             <i data-feather="lock" class="w-5 h-5"></i>
           </span>
           <input type="password" id="password" name="password" placeholder="Your password" required
-                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:border-purple-500 focus:outline-none transition duration-200"/>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between text-sm">
-        <div class="flex items-center">
-          <input id="remember_me" name="remember_me" type="checkbox"
-                 class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"/>
-          <label for="remember_me" class="ml-2 block text-gray-900">
-            Remember me
-          </label>
+                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:border-blue-500 focus:outline-none transition duration-200"/>
         </div>
       </div>
 
       <div class="pt-4">
         <button type="submit"
-                class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold text-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out">
+                class="login-button w-full text-white py-3 rounded-lg font-semibold text-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out">
           Log In
         </button>
       </div>

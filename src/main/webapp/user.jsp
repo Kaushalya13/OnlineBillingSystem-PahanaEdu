@@ -57,55 +57,59 @@
 <input type="hidden" id="loggedInUserRole" value="<%= userRole %>">
 
 <div class="ml-64 p-8">
-    <div class="flex justify-between items-center mb-10">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
         <h1 class="text-4xl font-extrabold text-gray-900 flex items-center gap-4">
             <i data-feather="user-check" class="w-8 h-8 text-blue-500"></i> User Management
         </h1>
-    </div>
-
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div class="flex flex-wrap items-center gap-4">
-            <input type="text" id="searchInput" placeholder="Search by name..."
-                   class="form-input-modern w-full md:w-80"/>
-            <button id="refreshBtn"
-                    class="bg-gray-200 text-gray-800 font-semibold px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                Refresh
-            </button>
-        </div>
         <c:if test="${sessionScope.role == 'ADMIN'}">
-            <button id="openAddUserModalBtn" class="btn-success bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md flex items-center">
-                <i data-feather="plus" class="w-4 h-4 inline-block mr-2"></i>
+            <button id="openAddUserModalBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-md inline-flex items-center shadow-md">
+                <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>
                 Add User
             </button>
         </c:if>
     </div>
 
-    <div class="card-light p-8 rounded-2xl">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">User List</h2>
-
-        <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
-            <span id="messageText"></span>
+    <div class="bg-white rounded-lg shadow-md border border-gray-200">
+        <div class="p-4 border-b flex flex-col sm:flex-row items-center gap-4">
+            <div class="relative flex-grow w-full sm:w-auto">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i data-feather="search" class="w-4 h-4 text-gray-400"></i>
+                </div>
+                <input type="text" id="searchInput" placeholder="Search by username "
+                       class="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-sm"/>
+            </div>
+            <button id="refreshBtn"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md inline-flex items-center shadow-sm">
+                <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i> Refresh
+            </button>
         </div>
 
-        <div id="loadingIndicator" class="text-center py-8 hidden">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
-            <p class="text-gray-600 mt-3">Loading Users...</p>
-        </div>
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">User Details</h2>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto">
-                <thead class="bg-gray-100 text-gray-700 font-bold">
-                <tr>
-                    <th class="px-6 py-3 text-left rounded-tl-xl">User ID</th>
-                    <th class="px-6 py-3 text-left">Username</th>
-                    <th class="px-6 py-3 text-left">Role</th>
-                    <th class="px-6 py-3 text-left rounded-tr-xl">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
+            <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
+                <span id="messageText"></span>
+            </div>
+
+            <div id="loadingIndicator" class="text-center py-8 hidden">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
+                <p class="text-gray-600 mt-3">Loading Users...</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-100 text-gray-700 font-bold">
+                    <tr>
+                        <th class="px-6 py-3 text-left rounded-tl-xl">User ID</th>
+                        <th class="px-6 py-3 text-left">Username</th>
+                        <th class="px-6 py-3 text-left">Role</th>
+                        <th class="px-6 py-3 text-left rounded-tr-xl">Actions</th>
+                    </tr>
+                    </thead>
                     <tbody id="userTableBody">
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -123,10 +127,12 @@
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                 <input type="text" id="username" name="username" placeholder="Enter Username" class="form-input-modern w-full" />
+                <p id="usernameError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter Password" class="form-input-modern w-full" />
+                <p id="passwordError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -135,9 +141,10 @@
                     <option value="ADMIN">Admin</option>
                     <option value="USER">User</option>
                 </select>
+                <p id="roleError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
             </div>
             <div class="flex justify-end gap-4 mt-6">
-                <button type="button" id="cancel-add-modal-btn" class="bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                <button type="button" id="cancel-add-modal-btn" class="bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg transition-colors duration-200">
                     Cancel
                 </button>
                 <button type="submit" class="btn-success bg-green-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200">
@@ -179,7 +186,6 @@
 </div>
 
 <script>
-    // --- 1. GLOBAL VARIABLE DECLARATIONS ---
     let userTableBody, loadingIndicator, messageDisplay, messageText, searchInput, refreshBtn;
     let userModal, viewUserModal, userForm;
     let searchTimeout;
@@ -218,7 +224,47 @@
         modal.classList.add('hidden');
     }
 
-    // --- API Call Functions ---
+    function resetValidation() {
+        document.querySelectorAll('#userForm .error-message').forEach(el => {
+            el.classList.add('hidden');
+            el.textContent = '';
+        });
+    }
+
+    function validateUserForm() {
+        resetValidation();
+        let isValid = true;
+        const isEdit = !!document.getElementById('userId').value;
+        const username = document.getElementById("username");
+        if (username.value.trim().length < 3) {
+            document.getElementById("usernameError").textContent = "Username must be at least 3 characters.";
+            document.getElementById("usernameError").classList.remove("hidden");
+            isValid = false;
+        }
+        const password = document.getElementById("password");
+        const passwordValue = password.value.trim();
+        if (!isEdit) {
+            if (passwordValue.length < 6) {
+                document.getElementById("passwordError").textContent = "Password must be at least 6 characters.";
+                document.getElementById("passwordError").classList.remove("hidden");
+                isValid = false;
+            }
+        } else {
+            if (passwordValue.length > 0 && passwordValue.length < 6) {
+                document.getElementById("passwordError").textContent = "New password must be at least 6 characters.";
+                document.getElementById("passwordError").classList.remove("hidden");
+                isValid = false;
+            }
+        }
+        const role = document.getElementById("role");
+        if (role.value === "") {
+            document.getElementById("roleError").textContent = "Please select a role.";
+            document.getElementById("roleError").classList.remove("hidden");
+            isValid = false;
+        }
+        return isValid;
+    }
+
     async function fetchUser(searchTerm = '') {
         showLoading(true);
         let url = getContextPath() + '/users';
@@ -238,7 +284,6 @@
         }
     }
 
-    // --- Rendering Function (Rewritten as requested) ---
     function renderUsers(users) {
         userTableBody.innerHTML = '';
         if (!users || users.length === 0) {
@@ -279,6 +324,7 @@
 
     function handleOpenAddModal() {
         userForm.reset();
+        resetValidation();
         document.getElementById('userId').value = '';
         document.getElementById('modalTitle').textContent = 'Add New User';
         document.querySelector('#password').parentElement.classList.remove('hidden');
@@ -303,6 +349,9 @@
     }
 
     async function handleOpenEditModal(id) {
+        userForm.reset();
+        resetValidation();
+
         try {
             let url = getContextPath() + '/users?id=' + encodeURIComponent(id);
             const response = await fetch(url);
@@ -327,6 +376,9 @@
 
     async function handleUserFormSubmit(e) {
         e.preventDefault();
+
+        if (!validateUserForm()) return;
+
         const id = document.getElementById('userId').value;
         const isEdit = !!id;
         const formData = new URLSearchParams(new FormData(userForm));
@@ -378,7 +430,6 @@
         searchTimeout = setTimeout(() => fetchUser(searchInput.value), 1000);
     }
 
-    // --- 3. MAIN INITIALIZATION FUNCTION ---
     function initUserPage() {
         userTableBody = document.getElementById('userTableBody');
         loadingIndicator = document.getElementById('loadingIndicator');
@@ -400,6 +451,11 @@
         userForm.addEventListener('submit', handleUserFormSubmit);
         searchInput.addEventListener('input', handleSearchInput);
 
+        const closeModalAndReset = () => {
+            closeModal(userModal);
+            resetValidation();
+        };
+
         document.getElementById('closeModalBtn').addEventListener('click', () => closeModal(userModal));
         document.getElementById('cancel-add-modal-btn').addEventListener('click', () => closeModal(userModal));
         document.getElementById('close-view-modal-btn').addEventListener('click', () => closeModal(viewUserModal));
@@ -409,10 +465,26 @@
             const viewBtn = e.target.closest('.view-btn');
             const editBtn = e.target.closest('.edit-btn');
             const deleteBtn = e.target.closest('.delete-btn');
+            const closeBtn = e.target.closest('.closeModalBtn');
 
+            if (closeBtn) closeModal(closeBtn.closest('.modal-overlay'));
             if (viewBtn) handleOpenViewModal(viewBtn.dataset.userId);
             if (editBtn) handleOpenEditModal(editBtn.dataset.userId);
             if (deleteBtn) handleDeleteUser(deleteBtn.dataset.userId);
+        });
+
+        [userModal, viewUserModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) {
+                        if (modal === userModal) {
+                            closeModalAndReset();
+                        } else {
+                            closeModal(modal);
+                        }
+                    }
+                });
+            }
         });
 
         allModals.forEach(modal => {
@@ -421,11 +493,9 @@
             }
         });
 
-        // --- Initial Data Load ---
         fetchUser();
     }
 
-    // --- 4. ENTRY POINT (Corrected) ---
     window.addEventListener('load', initUserPage);
 </script>
 </body>

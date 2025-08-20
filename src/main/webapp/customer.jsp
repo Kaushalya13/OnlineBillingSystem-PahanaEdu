@@ -57,58 +57,64 @@
 <input type="hidden" id="loggedInUserRole" value="<%= userRole %>">
 
 <div class="ml-64 p-8">
-    <div class="flex justify-between items-center mb-10">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
         <h1 class="text-4xl font-extrabold text-gray-900 flex items-center gap-4">
             <i data-feather="users" class="w-8 h-8 text-blue-500"></i> Customer Management
         </h1>
-    </div>
-
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div class="flex flex-wrap items-center gap-4">
-            <input type="text" id="searchInput" placeholder="Search by name..."
-                   class="form-input-modern w-full md:w-80"/>
-            <button id="refreshBtn"
-                    class="bg-gray-200 text-gray-800 font-semibold px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                Refresh
-            </button>
-        </div>
         <c:if test="${sessionScope.role == 'ADMIN'}">
-            <button id="openAddCustomerModalBtn" class="btn-success bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md flex items-center">
-                <i data-feather="plus" class="w-4 h-4 inline-block mr-2"></i>
+            <button id="openAddCustomerModalBtn" class="btn-success bg-green-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md flex items-center">
+                <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>
                 Add Customer
             </button>
         </c:if>
     </div>
 
-    <div class="card-light p-8 rounded-2xl">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Customer List</h2>
-
-        <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
-            <span id="messageText"></span>
+    <div class="bg-white rounded-lg shadow-md border border-gray-20">
+        <div class="p-4 border-b flex flex-col sm:flex-row items-center gap-4">
+            <div class="relative flex-grow w-full sm:w-auto">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i data-feather="search" class="w-4 h-4 text-gray-400"></i>
+                </div>
+                <input type="text" id="searchInput" placeholder="Search by name "
+                       class="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-sm"/>
+            </div>
+            <button id="refreshBtn"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md inline-flex items-center shadow-sm">
+                <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>
+                Refresh
+            </button>
         </div>
 
-        <div id="loadingIndicator" class="text-center py-8 hidden">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
-            <p class="text-gray-600 mt-3">Loading Customers...</p>
-        </div>
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Customer Details</h2>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto">
-                <thead class="bg-gray-100 text-gray-700 font-bold">
-                <tr>
-                    <th class="px-6 py-3 text-left rounded-tl-xl">Customer ID</th>
-                    <th class="px-6 py-3 text-left">Name</th>
-                    <th class="px-6 py-3 text-left">Address</th>
-                    <th class="px-6 py-3 text-left">Mobile</th>
-                    <th class="px-6 py-3 text-left">Account No</th>
-                    <th class="px-6 py-3 text-left">Units</th>
-                    <th class="px-6 py-3 text-left rounded-tr-xl">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
+            <div id="messageDisplay" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
+                <span id="messageText"></span>
+            </div>
+
+            <div id="loadingIndicator" class="text-center py-8 hidden">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
+                <p class="text-gray-600 mt-3">Loading Customers...</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-100 text-gray-700 font-bold">
+                    <tr>
+                        <th class="px-6 py-3 text-left rounded-tl-xl">Customer ID</th>
+                        <th class="px-6 py-3 text-left">Name</th>
+                        <th class="px-6 py-3 text-left">Address</th>
+                        <th class="px-6 py-3 text-left">Mobile</th>
+                        <th class="px-6 py-3 text-left">Account No</th>
+                        <th class="px-6 py-3 text-left">Units</th>
+                        <th class="px-6 py-3 text-left rounded-tr-xl">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     <tbody id="customerTableBody">
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -127,22 +133,27 @@
                 <div>
                     <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
                     <input type="text" id="customerName" name="cus_Name" placeholder="Enter Name" class="form-input-modern w-full" />
+                    <p id="customerNameError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
                 </div>
                 <div>
                     <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input type="text" id="address" name="cus_Address" placeholder="Enter Address" class="form-input-modern w-full" />
+                    <p id="addressError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
                 </div>
                 <div>
                     <label for="mobile" class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
                     <input type="text" id="mobile"  name="cus_Mobile" placeholder="Enter Mobile Number" class="form-input-modern w-full" />
+                    <p id="customerMobileNumberError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
                 </div>
                 <div>
                     <label for="accountNumber" class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
                     <input type="text" id="accountNumber" name="cus_AccountNumber" placeholder="Enter Account Number" class="form-input-modern w-full" />
+                    <p id="customerAccountNumberError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
                 </div>
                 <div>
                     <label for="unitsConsumed" class="block text-sm font-medium text-gray-700 mb-1">Units Consumed</label>
-                    <input type="number" id="unitsConsumed" name="units_consumed" placeholder="Enter Units Consumed" required step="0.01" min="0" class="form-input-modern w-full" />
+                    <input type="number" id="unitsConsumed" name="units_consumed" placeholder="Enter Units Consumed" step="0.01" min="0" class="form-input-modern w-full" />
+                    <p id="unitsConsumedError" class="text-red-500 text-sm mt-1 hidden error-message"></p>
                 </div>
             </div>
             <div class="flex justify-end gap-4 mt-6">
@@ -229,7 +240,6 @@
 
 <script>
 
-    // --- 1. GLOBAL VARIABLE DECLARATIONS ---
     let customerTableBody, loadingIndicator, messageDisplay, messageText, searchInput, refreshBtn;
     let customerModal,viewCustomerModal,accountDetailsModal,customerForm,accountDetailsForm;
     let searchTimeout;
@@ -269,8 +279,48 @@
         modal.classList.add('hidden');
     }
 
+    function resetValidation() {
+        document.querySelectorAll('#customerForm .error-message').forEach(el => {
+            el.classList.add('hidden');
+            el.textContent = '';
+        });
+    }
 
-    // --- API Call Functions ---
+    function validateCustomerForm() {
+        resetValidation();
+        let isValid = true;
+
+        const customerName = document.getElementById("customerName");
+        if (customerName.value.trim() === "") {
+            document.getElementById("customerNameError").textContent = "Customer name is required.";
+            document.getElementById("customerNameError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        const mobile = document.getElementById("mobile");
+        if (!mobile.value.match(/^\d{10}$/)) {
+            document.getElementById("customerMobileNumberError").textContent = "Mobile number must be exactly 10 digits.";
+            document.getElementById("customerMobileNumberError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        const accountNumber = document.getElementById("accountNumber");
+        if (accountNumber.value.trim() === "") {
+            document.getElementById("customerAccountNumberError").textContent = "Account number is required.";
+            document.getElementById("customerAccountNumberError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        const unitsConsumed = document.getElementById("unitsConsumed");
+        if (unitsConsumed.value < 0) {
+            document.getElementById("unitsConsumedError").textContent = "Units consumed cannot be a negative number.";
+            document.getElementById("unitsConsumedError").classList.remove("hidden");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     async function fetchCustomer(searchTerm = '') {
         showLoading(true);
         let url = getContextPath() + '/customers';
@@ -290,7 +340,6 @@
         }
     }
 
-    // --- Rendering Function ---
     function renderCustomers(customers) {
         console.log(customers);
 
@@ -346,9 +395,9 @@
 
     }
 
-    // --- Event Handler Functions ---
     function handleOpenAddModal() {
         customerForm.reset();
+        resetValidation();
         document.getElementById('customerId').value = '';
         document.getElementById('modalTitle').textContent = 'Add New Customer';
         openModal(customerModal);
@@ -380,6 +429,9 @@
     }
 
     async function handleOpenEditModal(id) {
+        customerForm.reset();
+        resetValidation();
+
         try {
             let url = getContextPath() + '/customers?id=' + encodeURIComponent(id);
             const response = await fetch(url);
@@ -407,6 +459,9 @@
 
     async function handleCustomerFormSubmit(e) {
         e.preventDefault();
+        if (!validateCustomerForm()) {
+            return;
+        }
         const id = document.getElementById('customerId').value;
         const isEdit = !!id;
         const formData = new URLSearchParams(new FormData(customerForm));
@@ -456,7 +511,6 @@
         searchTimeout = setTimeout(() => fetchCustomer(searchInput.value), 300);
     }
 
-    // --- 3. MAIN INITIALIZATION FUNCTION ---
     function initCustomerPage() {
         customerTableBody = document.getElementById('customerTableBody');
         loadingIndicator = document.getElementById('loadingIndicator');
@@ -480,20 +534,20 @@
         customerForm.addEventListener('submit', handleCustomerFormSubmit);
         searchInput.addEventListener('input', handleSearchInput);
 
-        // Close/Cancel buttons for the customerModal (add/edit)
+        const closeModalAndReset = () => {
+            closeModal(customerModal);
+            resetValidation();
+        };
+
         document.getElementById('closeModalBtn').addEventListener('click', () => closeModal(customerModal));
         document.getElementById('cancel-add-modal-btn').addEventListener('click', () => closeModal(customerModal));
 
-        // Close buttons for the viewCustomerModal
         document.getElementById('close-view-modal-btn').addEventListener('click', () => closeModal(viewCustomerModal));
         document.getElementById('cancel-view-modal-btn-bottom').addEventListener('click', () => closeModal(viewCustomerModal));
 
-        // Close buttons for the accountDetailsModal
         document.getElementById('close-account-modal-btn').addEventListener('click', () => closeModal(accountDetailsModal));
         document.getElementById('close-account-modal-btn-bottom').addEventListener('click', () => closeModal(accountDetailsModal));
 
-        // Use event delegation for buttons inside the dynamic table and modals
-        // Corrected event delegation listener in initCustomerPage
         document.body.addEventListener('click', (e) => {
             const viewBtn = e.target.closest('.view-btn');
             const editBtn = e.target.closest('.edit-btn');
@@ -506,18 +560,30 @@
             if (deleteBtn) handleDeleteCustomer(deleteBtn.dataset.customerId);
         });
 
+        [customerModal, viewCustomerModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) {
+                        if (modal === customerModal) {
+                            closeModalAndReset();
+                        } else {
+                            closeModal(modal);
+                        }
+                    }
+                });
+            }
+        });
+
         allModals.forEach(modal => {
             if (modal) {
                 modal.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
             }
         });
 
-        // --- Initial Data Load ---
         fetchCustomer();
         feather.replace();
     }
 
-    // --- 4. ENTRY POINT ---
     document.addEventListener('DOMContentLoaded', initCustomerPage);
 
 </script>
