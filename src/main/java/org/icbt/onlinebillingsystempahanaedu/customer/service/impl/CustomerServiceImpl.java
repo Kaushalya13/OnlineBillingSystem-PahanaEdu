@@ -58,6 +58,34 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public CustomerDTO findByMobile(Object... args) throws SQLException, ClassNotFoundException {
+        if (args.length < 1 || !(args[0] instanceof String)) {
+            throw new IllegalArgumentException("Search by phone requires a phone number (String).");
+        }
+
+        Connection connection = null;
+        String phoneNumber = (String) args[0];
+
+        try {
+            connection = DBConnection.getConnection();
+            CustomerEntity entity = customerDAO.findByPhoneNumber(connection, phoneNumber);
+
+            if (entity == null) {
+                logger.log(Level.WARNING, "Customer with phone " + phoneNumber + " not found.");
+                return null;
+            }
+
+            logger.log(Level.INFO, "Customer with phone " + phoneNumber + " found.");
+            return CustomerMapper.convertCustomerEntityToCustomerDTO(entity);
+        } catch (CustomException e) {
+            logger.log(Level.SEVERE, "SQL Exception: " + e.getMessage());
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
+    }
+
+    @Override
     public boolean add(CustomerDTO dto) throws SQLException, ClassNotFoundException {
         Connection connection = null;
 
@@ -214,6 +242,21 @@ public class CustomerServiceImpl implements CustomerService {
             logger.log(Level.SEVERE, "Error during customer deleting for Id" + customerIdStr);
             throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
         } finally {
+            DBConnection.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public int getTotalCustomers() throws SQLException, ClassNotFoundException {
+        Connection connection = null;
+
+        try {
+            connection = DBConnection.getConnection();
+            return customerDAO.getTotalCustomers(connection);
+        }catch (SQLException e) {
+            logger.log(Level.SEVERE,"Database Exception: " + e.getMessage());
+            throw new CustomException(CustomException.ExceptionType.DATABASE_ERROR);
+        }finally {
             DBConnection.closeConnection(connection);
         }
     }

@@ -188,6 +188,39 @@ public class CustomerDAOImpl implements CustomerDAO {
         }
     }
 
+    @Override
+    public CustomerEntity findByPhoneNumber(Connection connection, Object... args) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT * FROM customers WHERE cus_Mobile = ? AND deleted_at IS NULL";
+        String mobileNumber = (String) args[0];
+        ResultSet resultSet = null;
+
+        try {
+            resultSet = DAOUtil.executeQuery(connection, sql, mobileNumber);
+            if (resultSet.next()) {
+                return mapResultSetToCustomerEntity(resultSet);
+            }
+            return null;
+        } finally {
+            DBConnection.closeResultSet(resultSet);
+        }
+    }
+
+    public int getTotalCustomers(Connection connection) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(id) FROM customers WHERE deleted_at IS NULL";
+
+        ResultSet resultSet = null;
+
+        try {
+            resultSet = DAOUtil.executeQuery(connection, sql);
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+            return 0;
+        }finally {
+            DBConnection.closeResultSet(resultSet);
+        }
+    }
+
     private CustomerEntity mapResultSetToCustomerEntity(ResultSet resultSet) throws SQLException {
         CustomerEntity customerEntity = new CustomerEntity();
         customerEntity.setCus_Id(resultSet.getInt("id"));

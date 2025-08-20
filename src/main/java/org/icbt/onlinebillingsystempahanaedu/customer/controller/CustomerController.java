@@ -186,6 +186,17 @@ public class CustomerController extends HttpServlet {
                 return;
             }
 
+            String phoneStr = request.getParameter("phone");
+            if (phoneStr != null && !phoneStr.isEmpty()) {
+                CustomerDTO dto = customerService.findByMobile(phoneStr);
+                if (dto != null) {
+                    SendResponse.sendJson(response, HttpServletResponse.SC_OK, List.of(customerDTOtoMap(dto)));
+                } else {
+                    SendResponse.sendJson(response, HttpServletResponse.SC_OK, List.of());
+                }
+                return;
+            }
+
             String accountNumber = request.getParameter("cus_AccountNumber");
             if (accountNumber != null && !accountNumber.isEmpty()) {
                 CustomerDTO dto = customerService.findByAccountNumber(accountNumber);
@@ -228,7 +239,7 @@ public class CustomerController extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String currentUserRole = getUserRoleFromSession(request);
         Integer currentUserId = getUserIdFromSession(request);
 
@@ -249,7 +260,7 @@ public class CustomerController extends HttpServlet {
 
             if (idStr != null && !idStr.isEmpty()) {
                 dto.setCus_Id(Integer.parseInt(idStr));
-            }else {
+            } else {
                 SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid customer id"));
                 return;
             }
@@ -272,21 +283,21 @@ public class CustomerController extends HttpServlet {
 
             if (updated) {
                 CustomerDTO updateCustomer = customerService.findByAccountNumber(dto.getCus_AccountNumber());
-                SendResponse.sendJson(response, HttpServletResponse.SC_OK,Map.of(
+                SendResponse.sendJson(response, HttpServletResponse.SC_OK, Map.of(
                         "message", "Customer updated successfully.",
                         "customer", customerDTOtoMap(updateCustomer)
                 ));
-            }else {
+            } else {
                 SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Customer update failed."));
             }
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             logger.log(Level.WARNING, "Error Invalid number format for unit consumed: " + e.getMessage());
-            SendResponse.sendJson(response,HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid unit consumed. Enter valid number"));
-        }catch (CustomException e){
+            SendResponse.sendJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Invalid unit consumed. Enter valid number"));
+        } catch (CustomException e) {
             logger.log(Level.WARNING, "Error Custom Exception: " + e.getMessage() + " - " + e.getExceptionType().name());
             String error;
             int statusCode = HttpServletResponse.SC_BAD_REQUEST;
-            switch (e.getExceptionType()){
+            switch (e.getExceptionType()) {
                 case CUSTOMER_NOT_FOUND:
                     error = "Customer not found.";
                     statusCode = HttpServletResponse.SC_NOT_FOUND;
@@ -307,7 +318,7 @@ public class CustomerController extends HttpServlet {
                     break;
             }
             SendResponse.sendJson(response, statusCode, Map.of("message", error));
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.log(Level.WARNING, "Error add customer : " + e.getMessage());
             SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Internal server error."));
         }
@@ -315,7 +326,7 @@ public class CustomerController extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String currentUserRole = getUserRoleFromSession(request);
         Integer currentUserId = getUserIdFromSession(request);
 
@@ -332,17 +343,17 @@ public class CustomerController extends HttpServlet {
         }
 
         try {
-            boolean deleted = customerService.delete(currentUserId,id);
+            boolean deleted = customerService.delete(currentUserId, id);
             if (deleted) {
                 SendResponse.sendJson(response, HttpServletResponse.SC_OK, Map.of("message", "Customer deleted successfully."));
-            }else {
+            } else {
                 SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Customer delete failed."));
             }
-        }catch (CustomException e){
+        } catch (CustomException e) {
             logger.log(Level.WARNING, "Error Custom Exception: " + e.getMessage() + " - " + e.getExceptionType().name());
             String error;
             int statusCode = HttpServletResponse.SC_BAD_REQUEST;
-            switch (e.getExceptionType()){
+            switch (e.getExceptionType()) {
                 case CUSTOMER_NOT_FOUND:
                     error = "Customer not found.";
                     statusCode = HttpServletResponse.SC_NOT_FOUND;
@@ -360,7 +371,7 @@ public class CustomerController extends HttpServlet {
                     break;
             }
             SendResponse.sendJson(response, statusCode, Map.of("message", error));
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.log(Level.WARNING, "Error deleting customer : " + e.getMessage());
             SendResponse.sendJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Internal server error."));
         }

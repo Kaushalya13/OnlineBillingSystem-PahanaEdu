@@ -98,7 +98,6 @@ public class ItemDAOImpl implements ItemDAO {
         StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM items WHERE deleted_at IS NULL");
         List<Object> params = new ArrayList<>();
 
-        // Add search filters if present
         if (searchParams != null) {
             String searchValue = searchParams.get("search");
             if (searchValue != null && !searchValue.trim().isEmpty()) {

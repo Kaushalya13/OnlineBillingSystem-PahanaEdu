@@ -149,7 +149,7 @@
       <button id="cancelBtn" class="bg-gray-200 font-semibold py-2 px-4 rounded-md">Close</button>
       <button id="createBillBtn"
               class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md inline-flex items-center">
-        <i data-feather="save" class="w-4 h-4 mr-2"></i> Save & Download Bill
+        <i data-feather="save" class="w-4 h-4 mr-2"></i> Save Bill
       </button>
     </div>
   </div>

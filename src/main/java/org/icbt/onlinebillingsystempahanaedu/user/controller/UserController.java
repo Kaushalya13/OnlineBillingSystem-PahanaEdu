@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
 import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.core.util.SendResponse;
+import org.icbt.onlinebillingsystempahanaedu.core.validation.CustomValidation;
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
 import org.icbt.onlinebillingsystempahanaedu.user.service.UserService;
 import org.icbt.onlinebillingsystempahanaedu.user.service.impl.UserServiceImpl;
@@ -129,9 +130,17 @@ public class UserController extends HttpServlet {
                     return;
                 }
 
+                try {
+                    CustomValidation.validateUser(dto);
+                } catch (CustomException e) {
+                    logger.warning("User Validation Failed: " + e.getMessage());
+                    SendResponse.sendJson(resp, HttpServletResponse.SC_BAD_REQUEST,
+                            Map.of("message", "Invalid data", "errors", e.getMessage()));
+                    return;
+                }
+
                 boolean addedUser = userService.add(dto);
                 if (addedUser) {
-                    // Fetch the newly added user to get its ID and audit timestamps
                     UserDTO newlyAddedUser = userService.findByUsername(dto.getUsername());
                     SendResponse.sendJson(resp, HttpServletResponse.SC_CREATED, Map.of("message", "User added successfully", "user", userDTOtoMap(newlyAddedUser)));
                 } else {

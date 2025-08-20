@@ -47,6 +47,12 @@ public class CustomException extends RuntimeException{
         ITEM_DELETION_FAILED,
         INSUFFICIENT_STOCK,
 
+        // ===== BILL EXCEPTIONS =====
+        BILL_NOT_FOUND,
+        BILL_CREATION_FAILED,
+        BILL_DELETION_FAILED,
+        INVALID_BILL_INPUTS,
+
         // ===== GENERAL EXCEPTIONS =====
         CONFIGURATION_ERROR,
         DATABASE_ERROR,

@@ -50,7 +50,6 @@ public class SendResponse {
         }
     }
 
-    // --- JSON serialization helpers ---
 
     private static String toJsonString(Object obj) {
         if (obj == null) {
@@ -74,7 +73,6 @@ public class SendResponse {
         if (obj instanceof Date) {
             return "\"" + DATE_FORMAT.format((Date) obj) + "\"";
         }
-        // fallback
         return "\"" + escapeJson(obj.toString()) + "\"";
     }
 

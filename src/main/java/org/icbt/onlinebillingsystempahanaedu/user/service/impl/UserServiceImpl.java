@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
             UserEntity userEntity = userDAO.searchById(connection, args[0]);
             if (userEntity == null) {
-                throw new SQLException("User not found with ID: " + args[0]);
+                throw new CustomException(CustomException.ExceptionType.USER_NOT_FOUND);
             }
 
             return UserMapper.convertUserEntityToUserDTO(userEntity);
@@ -167,6 +167,7 @@ public class UserServiceImpl implements UserService {
             logger.warning("Attempt to delete initial admin user (ID: " + INITIAL_ADMIN_ID + ") was blocked.");
             throw new CustomException(CustomException.ExceptionType.UNAUTHORIZED_ACCESS);
         }
+
 
         Connection connection = null;
         try {

@@ -50,7 +50,6 @@ public class PasswordSecurityUtil {
             return false;
         }
 
-        // Hash the provided password using the same method and parameters
         String hashedPassword = hashPassword(password);
         return hashedPassword.equals(storedHash);
     }

@@ -19,5 +19,4 @@ public interface ItemService extends CrudService<ItemDTO> {
 
     int getItemsCount() throws SQLException, ClassNotFoundException;
 
-    boolean restockItem(Integer itemId, int quantityToAdd) throws SQLException, ClassNotFoundException;
 }

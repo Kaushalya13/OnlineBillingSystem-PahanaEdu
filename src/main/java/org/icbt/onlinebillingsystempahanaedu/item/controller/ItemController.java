@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.core.util.SendResponse;
+import org.icbt.onlinebillingsystempahanaedu.core.validation.CustomValidation;
 import org.icbt.onlinebillingsystempahanaedu.item.dto.ItemDTO;
 import org.icbt.onlinebillingsystempahanaedu.item.service.ItemService;
 import org.icbt.onlinebillingsystempahanaedu.item.service.impl.ItemServiceImpl;
@@ -134,6 +135,15 @@ public class ItemController extends HttpServlet {
             dto.setUnitPrice(Double.parseDouble(unitPriceStr));
             dto.setQuantity(Integer.parseInt(quantityStr));
 
+            try {
+                CustomValidation.validateItem(dto);
+            } catch (CustomException e) {
+                logger.warning("Item Validation Failed: " + e.getMessage());
+                SendResponse.sendJson(resp, HttpServletResponse.SC_BAD_REQUEST,
+                        Map.of("message", "Invalid data", "errors", e.getMessage()));
+                return;
+            }
+
             boolean isAdded = itemService.add(dto);
             if (isAdded) {
                 ItemDTO addedItem = itemService.findByName(dto.getItemName());
@@ -255,27 +265,7 @@ public class ItemController extends HttpServlet {
 
             Integer itemId = Integer.parseInt(idStr);
 
-            if ("restock".equals(action)) {
-                String qtyToAddStr = params.get("quantityToAdd");
-                if (qtyToAddStr == null || qtyToAddStr.isEmpty()) {
-                    SendResponse.sendJson(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of("message", "Quantity to add is required for restock."));
-                    return;
-                }
-                int qtyToAdd = Integer.parseInt(qtyToAddStr);
-
-                boolean restocked = itemService.restockItem(itemId, qtyToAdd);
-                if (restocked) {
-                    ItemDTO updatedItem = itemService.searchById(itemId);
-                    SendResponse.sendJson(resp, HttpServletResponse.SC_OK, Map.of(
-                            "message", "Item restocked successfully",
-                            "item", itemDtoToMap(updatedItem)
-                    ));
-                } else {
-                    SendResponse.sendJson(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("message", "Failed to restock item."));
-                }
-
-            }
-            else if ("update".equalsIgnoreCase(action)) {
+            if ("update".equalsIgnoreCase(action)) {
                 ItemDTO dto = new ItemDTO();
                 dto.setId(itemId);
                 dto.setItemName(params.get("itemName"));
@@ -291,6 +281,15 @@ public class ItemController extends HttpServlet {
 
                 dto.setUnitPrice(Double.parseDouble(unitPriceStr));
                 dto.setQuantity(Integer.parseInt(quantityStr));
+
+                try {
+                    CustomValidation.validateItem(dto);
+                } catch (CustomException e) {
+                    logger.warning("Item Validation Failed: " + e.getMessage());
+                    SendResponse.sendJson(resp, HttpServletResponse.SC_BAD_REQUEST,
+                            Map.of("message", "Invalid data", "errors", e.getMessage()));
+                    return;
+                }
 
                 boolean updated = itemService.update(dto);
                 if (updated) {
