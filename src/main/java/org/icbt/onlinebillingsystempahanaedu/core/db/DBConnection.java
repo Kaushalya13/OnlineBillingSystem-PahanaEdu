@@ -6,11 +6,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * author : Niwanthi
- * date : 7/22/2025
- * time : 5:13 PM
- */
 public class DBConnection {
     private static final String URL;
     private static final String USERNAME;
@@ -22,17 +17,32 @@ public class DBConnection {
     }
 
     static {
-        try (InputStream inputStream = DBConnection.class.getClassLoader().getResourceAsStream("database.properties")) {
-            Properties properties = new Properties();
-            if (inputStream == null) {
-                logger.log(Level.SEVERE, "database.properties file not found in the classpath.");
-                throw new RuntimeException("database.properties file not found in the classpath.");
+        try {
+            String dbUrl = System.getenv("TEST_DB_URL");
+            String dbUser = System.getenv("TEST_DB_USER");
+            String dbPassword = System.getenv("TEST_DB_PASSWORD");
+
+            if (dbUrl != null && dbUser != null && dbPassword != null) {
+                URL = dbUrl;
+                USERNAME = dbUser;
+                PASSWORD = dbPassword;
+                DRIVER = "com.mysql.cj.jdbc.Driver";
+                logger.log(Level.INFO, "Loaded database configuration from environment variables.");
+            } else {
+                try (InputStream inputStream = DBConnection.class.getClassLoader().getResourceAsStream("database.properties")) {
+                    Properties properties = new Properties();
+                    if (inputStream == null) {
+                        logger.log(Level.SEVERE, "database.properties file not found in the classpath.");
+                        throw new RuntimeException("database.properties file not found in the classpath.");
+                    }
+                    properties.load(inputStream);
+                    URL = properties.getProperty("database.url");
+                    USERNAME = properties.getProperty("database.username");
+                    PASSWORD = properties.getProperty("database.password");
+                    DRIVER = properties.getProperty("database.driver");
+                    logger.log(Level.INFO, "Loaded database configuration from database.properties file.");
+                }
             }
-            properties.load(inputStream);
-            URL = properties.getProperty("database.url");
-            USERNAME = properties.getProperty("database.username");
-            PASSWORD = properties.getProperty("database.password");
-            DRIVER = properties.getProperty("database.driver");
 
             Class.forName(DRIVER);
             logger.log(Level.INFO, "Database driver loaded successfully: " + DRIVER);
