@@ -1,0 +1,58 @@
+#========================================
+# 2. TEST JOB
+#========================================
+run-tests:
+  runs-on: ubuntu-latest
+  # The merge-validation job is not strictly necessary for tests to run
+  # but it's good practice to keep the dependency if you want that validation first.
+  # needs: merge-validation
+  services:
+    mysql:
+      image: mysql:8.0
+      env:
+        MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        MYSQL_DATABASE: ${{ secrets.TEST_DB_NAME }}
+      ports:
+        - 3306:3306
+      options: >-
+        --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    # ========================================================================
+    # NEW STEP: This is the fix!
+    # This step runs your SQL script to create the necessary tables.
+    # ========================================================================
+    - name: Initialize Database Schema
+      run: |
+        # Wait a few seconds to ensure MySQL is fully ready
+        sleep 15 
+        mysql -h 127.0.0.1 -u root -p${{ secrets.TEST_DB_PASSWORD }} ${{ secrets.TEST_DB_NAME }} < src/main/resources/testschema.sql
+
+    - name: Run All JUnit Tests
+      run: mvn test
+      env:
+        TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/${{ secrets.TEST_DB_NAME }}
+        TEST_DB_USER: root
+        TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: surefire-test-reports
+        path: target/surefire-reports/
+        retention-days: 7
