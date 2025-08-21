@@ -102,10 +102,11 @@
   </nav>
 
   <div class="p-6 border-t border-gray-200">
-    <button class="logout-button w-full flex items-center justify-center text-black font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+    <a href="${pageContext.request.contextPath}/users?action=logout"
+       class="logout-button w-full flex items-center justify-center text-black font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
       <i data-feather="log-out" class="w-5 h-5 mr-3 text-red-700"></i>
       Log Out
-    </button>
+    </a>
   </div>
 </aside>
 
