@@ -11,12 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * author : Niwanthi
- * date : 8/20/2025
- * time : 8:19 AM
- */
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BillDAOImplTest {
 
@@ -31,7 +25,7 @@ class BillDAOImplTest {
         Statement stmt = connection.createStatement();
         stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
         stmt.execute("TRUNCATE TABLE bill_details;");
-        stmt.execute("TRUNCATE TABLE bills;");
+        stmt.execute("TRUNCATE TABLE Bills;");
         stmt.execute("TRUNCATE TABLE customers;");
         stmt.execute("TRUNCATE TABLE users;");
         stmt.execute("SET FOREIGN_KEY_CHECKS = 1;");

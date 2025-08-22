@@ -11,12 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * author : Niwanthi
- * date : 8/20/2025
- * time : 8:19 AM
- */
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BillDetailsDAOImplTest {
 
@@ -31,7 +25,7 @@ class BillDetailsDAOImplTest {
         Statement stmt = connection.createStatement();
         stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
         stmt.execute("TRUNCATE TABLE bill_details;");
-        stmt.execute("TRUNCATE TABLE bills;");
+        stmt.execute("TRUNCATE TABLE Bills;");
         stmt.execute("TRUNCATE TABLE items;");
         stmt.execute("TRUNCATE TABLE customers;");
         stmt.execute("TRUNCATE TABLE users;");
@@ -41,8 +35,9 @@ class BillDetailsDAOImplTest {
         stmt.execute("INSERT INTO customers " +
                 "(id, cus_Name, cus_Address, cus_Mobile, cus_AccountNumber, units_consumed) " +
                 "VALUES (1, 'Test Customer', '123 Street', '0771112222', 'CUST001', 0);");
-        stmt.execute("INSERT INTO items (id, item_name, unit_price, quantity ) VALUES (101, 'Test Pen', 50.00, 100 );");
-        stmt.execute("INSERT INTO bills (id, customer_id, total_amount) VALUES (1, 1, 350.00);");
+        stmt.execute("INSERT INTO items (id, item_name, unit_price, quantity) VALUES (101, 'Test Pen', 50.00, 100);");
+        stmt.execute("INSERT INTO items (id, item_name, unit_price, quantity) VALUES (102, 'Test Book', 250.00, 50);");
+        stmt.execute("INSERT INTO Bills (id, customer_id, total_amount) VALUES (1, 1, 350.00);");
         stmt.close();
     }
 
