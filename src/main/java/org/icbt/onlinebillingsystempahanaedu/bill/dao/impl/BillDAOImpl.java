@@ -65,7 +65,7 @@ public class BillDAOImpl implements BillDAO {
     @Override
     public List<BillEntity> getAll(Connection connection, Map<String, String> searchParams) throws SQLException, ClassNotFoundException {
         List<BillEntity> bills = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Bills WHERE deleted_at IS NULL");
+        StringBuilder sql = new StringBuilder("SELECT * FROM bills WHERE deleted_at IS NULL");
         List<Object> params = new ArrayList<>();
 
         if (searchParams != null && searchParams.containsKey("search")) {
