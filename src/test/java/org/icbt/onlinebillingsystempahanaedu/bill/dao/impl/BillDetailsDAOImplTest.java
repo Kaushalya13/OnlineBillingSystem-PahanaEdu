@@ -25,7 +25,7 @@ class BillDetailsDAOImplTest {
         Statement stmt = connection.createStatement();
         stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
         stmt.execute("TRUNCATE TABLE bill_details;");
-        stmt.execute("TRUNCATE TABLE Bills;");
+        stmt.execute("TRUNCATE TABLE bills;");
         stmt.execute("TRUNCATE TABLE items;");
         stmt.execute("TRUNCATE TABLE customers;");
         stmt.execute("TRUNCATE TABLE users;");
@@ -37,7 +37,7 @@ class BillDetailsDAOImplTest {
                 "VALUES (1, 'Test Customer', '123 Street', '0771112222', 'CUST001', 0);");
         stmt.execute("INSERT INTO items (id, item_name, unit_price, quantity) VALUES (101, 'Test Pen', 50.00, 100);");
         stmt.execute("INSERT INTO items (id, item_name, unit_price, quantity) VALUES (102, 'Test Book', 250.00, 50);");
-        stmt.execute("INSERT INTO Bills (id, customer_id, total_amount) VALUES (1, 1, 350.00);");
+        stmt.execute("INSERT INTO bills (id, customer_id, total_amount) VALUES (1, 1, 350.00);");
         stmt.close();
     }
 

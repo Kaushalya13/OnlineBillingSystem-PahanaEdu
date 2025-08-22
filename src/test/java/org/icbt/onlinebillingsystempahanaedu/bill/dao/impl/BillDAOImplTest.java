@@ -25,7 +25,7 @@ class BillDAOImplTest {
         Statement stmt = connection.createStatement();
         stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
         stmt.execute("TRUNCATE TABLE bill_details;");
-        stmt.execute("TRUNCATE TABLE Bills;");
+        stmt.execute("TRUNCATE TABLE bills;");
         stmt.execute("TRUNCATE TABLE customers;");
         stmt.execute("TRUNCATE TABLE users;");
         stmt.execute("SET FOREIGN_KEY_CHECKS = 1;");
