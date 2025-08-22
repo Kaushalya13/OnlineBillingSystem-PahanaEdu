@@ -41,19 +41,14 @@ jobs:
   #========================================
   run-tests:
     runs-on: ubuntu-latest
-    # This job should run after merge validation passes on a PR
-    needs: merge-validation
-    # Add a timeout to prevent stuck jobs from running indefinitely
     timeout-minutes: 20
-    # This condition ensures tests run for both pushes and pull requests to the specified branches
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     services:
       mysql:
         image: mysql:8.0
         env:
-          # Use 'root' as the user for the service, consistent with the test step
           MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.TEST_DB_NAME }}
+          MYSQL_DATABASE: ${{ secrets.TEST_DB_NAME }} # Service block creates this empty database
         ports:
           - 3306:3306
         options: >-
@@ -77,22 +72,24 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Initialize Test Database Schema
+        env:
+          DB_USER: ${{ secrets.TEST_DB_USER }}
+          DB_PASS: ${{ secrets.TEST_DB_PASSWORD }}
+          DB_NAME: ${{ secrets.TEST_DB_NAME }}
         run: |
-          echo "Waiting for MySQL service to be ready..."
-          # This loop is a robust way to wait for the database to accept connections
-          until mysql -h 127.0.0.1 -P 3306 -u root -p"${{ secrets.TEST_DB_PASSWORD }}" -e "SELECT 1"; do
+          echo "Waiting for MySQL service..."
+          until mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1"; do
             sleep 2
           done
           echo "MySQL is ready. Populating schema..."
-          # IMPORTANT: Verify this path matches the location of your test schema file.
-          # Based on your project structure, it might be in 'src/test/resources/'
-          mysql -h 127.0.0.1 -P 3306 -u root -p"${{ secrets.TEST_DB_PASSWORD }}" "${{ secrets.TEST_DB_NAME }}" < src/test/java/resource/TestSchema.sql
+          # ✅ FIX: This command now correctly runs your simplified schema.sql against the database created by the 'services' block.
+          mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -D"$DB_NAME" < src/test/resources/schema.sql
 
       - name: Run All JUnit Tests
         run: mvn test
         env:
           TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/${{ secrets.TEST_DB_NAME }}
-          TEST_DB_USER: root # The user for the service is 'root'
+          TEST_DB_USER: ${{ secrets.TEST_DB_USER }}
           TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
 
       - name: Upload Test Reports
@@ -128,7 +125,7 @@ jobs:
           retention-days: 7
 
   #========================================
-  # 4. DEPLOYMENT JOBS
+  # 4. DEPLOYMENT JOBS (Placeholders)
   #========================================
   deploy-to-dev:
     needs: build
