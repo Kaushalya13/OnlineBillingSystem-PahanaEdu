@@ -83,7 +83,7 @@ jobs:
           done
           echo "MySQL is ready. Populating schema..."
           # ✅ FIX: This command now correctly runs your simplified schema.sql against the database created by the 'services' block.
-          mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -D"$DB_NAME" < src/test/resources/schema.sql
+          mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -D"$DB_NAME" < src/test/resources/TestSchema.sql
 
       - name: Run All JUnit Tests
         run: mvn test
