@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * date : 7/22/2025
  * time : 7:17 PM
  */
-@WebServlet(name = "UserController",urlPatterns = "/users")
+@WebServlet(name = "UserController", urlPatterns = "/users")
 public class UserController extends HttpServlet {
     private UserService userService;
     private static final Logger logger = Logger.getLogger(UserController.class.getName());

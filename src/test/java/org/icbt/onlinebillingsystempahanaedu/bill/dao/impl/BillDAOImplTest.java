@@ -11,12 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * author : Niwanthi
- * date : 8/20/2025
- * time : 8:19 AM
- */
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BillDAOImplTest {
 

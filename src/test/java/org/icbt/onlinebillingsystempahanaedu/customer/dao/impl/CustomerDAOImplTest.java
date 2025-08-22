@@ -1,6 +1,7 @@
 package org.icbt.onlinebillingsystempahanaedu.customer.dao.impl;
 
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
+import org.icbt.onlinebillingsystempahanaedu.customer.dao.impl.CustomerDAOImpl;
 import org.icbt.onlinebillingsystempahanaedu.customer.entity.CustomerEntity;
 import org.junit.jupiter.api.*;
 

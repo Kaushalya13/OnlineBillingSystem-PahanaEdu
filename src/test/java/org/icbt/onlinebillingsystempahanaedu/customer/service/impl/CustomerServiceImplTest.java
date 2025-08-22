@@ -3,6 +3,7 @@ package org.icbt.onlinebillingsystempahanaedu.customer.service.impl;
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
 import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.customer.dto.CustomerDTO;
+import org.icbt.onlinebillingsystempahanaedu.customer.service.impl.CustomerServiceImpl;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
@@ -117,7 +118,7 @@ public class CustomerServiceImplTest {
         customerService.add(createCustomer("CUST007", "User Two", "0778888888"));
 
         CustomerDTO toUpdate = customerService.findByAccountNumber("CUST007");
-        toUpdate.setCus_Mobile("0777777777"); // Duplicate phone
+        toUpdate.setCus_Mobile("0777777777");
 
         CustomException ex = assertThrows(CustomException.class,
                 () -> customerService.update(toUpdate)

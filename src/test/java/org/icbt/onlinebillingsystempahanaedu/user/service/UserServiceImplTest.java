@@ -1,9 +1,10 @@
-package org.icbt.onlinebillingsystempahanaedu.user.service.impl;
+package org.icbt.onlinebillingsystempahanaedu.user.service;
 
 import org.icbt.onlinebillingsystempahanaedu.core.constant.Role;
 import org.icbt.onlinebillingsystempahanaedu.core.db.DBConnection;
 import org.icbt.onlinebillingsystempahanaedu.core.exception.CustomException;
 import org.icbt.onlinebillingsystempahanaedu.user.dto.UserDTO;
+import org.icbt.onlinebillingsystempahanaedu.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
@@ -28,13 +29,11 @@ public class UserServiceImplTest {
         userService = new UserServiceImpl();
         connection = DBConnection.getConnection();
 
-        // Clear users table and reset AUTO_INCREMENT
         connection.prepareStatement("DELETE FROM users").executeUpdate();
         connection.prepareStatement("ALTER TABLE users AUTO_INCREMENT = 1").executeUpdate();
 
-        // Add initial admin with ID = 1
         UserDTO admin = createTestUserDTO("admin", "adminpass", Role.ADMIN);
-        userService.add(admin); // Will get ID = 1
+        userService.add(admin);
     }
 
     @AfterEach
