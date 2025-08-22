@@ -88,7 +88,7 @@ jobs:
           echo "MySQL is ready. Populating schema..."
           # IMPORTANT: Check the output of the 'List all files' step above in the logs.
           # If this path is wrong, replace it with the correct one you see in the log.
-          mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -D"$DB_NAME" < src/test/resources/TestSchema.sql
+          mysql -h 127.0.0.1 -P 3306 -u"$DB_USER" -p"$DB_PASS" -D"$DB_NAME" < src/test/java/resources/TestSchema.sql
 
       - name: Run All JUnit Tests
         run: mvn test
